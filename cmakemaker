@@ -1,0 +1,12 @@
+{
+	name : "tbb/tbb.h"
+    include_dir : "../../Dependencies/tbb/include"
+    lib_dir : "../../Dependencies/tbb/lib/intel64/vc14/tbb.lib"
+}
+
+{
+	name : "gtest/gtest.h"
+	find_command : "GTest"
+    include_dir : "${GTEST_INCLUDE_DIRS}"
+    lib_dir : "${GTEST_LIBRARIES}"
+}
