@@ -37,7 +37,15 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
        << "mark_as_advanced(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)"
        << std::endl
        << "add_definitions(-DUNICODE -D_UNICODE)" << std::endl
-       << std::endl;
+       << std::endl
+       << "if (WIN32)" << std::endl
+       << "  add_definitions(-DWindowsBuild)" << std::endl
+       << "  set(CMAKE_CXX_FLAGS_RELEASE  \"${CMAKE_CXX_FLAGS_RELEASE} -MP\")"
+       << std::endl
+       << "else(WIN32)" << std::endl
+       << "  add_definitions(-DUnixBuild)" << std::endl
+       << "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -fPIC\")" << std::endl
+       << "endif(WIN32)" << std::endl << std::endl;
 
   for (auto& subdir : dir.directories)
     open << "add_subdirectory(" << subdir << ")" << std::endl;
@@ -55,7 +63,7 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
   open << "cmake_minimum_required(VERSION 3.0)" << std::endl << std::endl;
 
   bool cuda_compile = dir.files["cu"].fmap.empty() ? false : true;
-  std::vector<std::string> extensions = {"cc", "cpp", "h", "cu", "cuh"};
+  std::vector<std::string> extensions = {"cc", "cpp", "h", "cu", "cuh", "qml"};
 
   if (cuda_compile) open << "find_package(CUDA)" << std::endl;
   for (auto& lib : dir.libraries) {
@@ -66,7 +74,7 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
         open << " COMPONENTS" << std::endl;
         for (auto& mod : lib_info.components) open << "  " << mod << std::endl;
       }
-      open << ")";
+      open << ")\n";
     }
   }
 
@@ -93,20 +101,53 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
 
   WriteSourceGroups(open, dir, extensions);
 
-  if (dir_name.find("runnable_") != std::string::npos) {
-    open << (cuda_compile ? "cuda_add_executable(" : "add_executable(");
-    open << proj_name << " ${cpp_files})";
-  } else if (dir_name.find("lib_") != std::string::npos) {
-    open << (cuda_compile ? "cuda_add_library(" : "add_library(");
-    open << proj_name << " SHARED ${cpp_files})";
+  if (!dir.moc_files.empty()) {
+    open << "qt5_wrap_cpp(moc_files\n";
+    for (auto& file : dir.moc_files) open << "  " + file + "\n";
+    open << ")\n\n";
+
+    if (!dir.precomp_h.empty() && !dir.precomp_cc.empty())
+      open << "foreach(src_file ${moc_files})\n"
+           << "  set_source_files_properties(${src_file} PROPERTIES "
+              "COMPILE_FLAGS \"/Yu" +
+                  dir.precomp_h.substr(dir.precomp_h.find_last_of('/') + 1,
+                                       dir.precomp_h.size()) +
+                  " /FI" +
+                  dir.precomp_h.substr(dir.precomp_h.find_last_of('/') + 1,
+                                       dir.precomp_h.size()) +
+                  "\")\n"
+           << "endforeach()\n\n";
   }
-  open << std::endl << std::endl;
+
+  if (dir_name.find("runnable_") != std::string::npos ||
+      dir_name.find("cmd_") != std::string::npos ||
+      dir_name.find("app_") != std::string::npos) {
+    open << (cuda_compile ? "cuda_add_executable(" : "add_executable(");
+    open << proj_name;
+    if (dir_name.find("app_") != std::string::npos) open << " WIN32";
+  } else if (dir_name.find("lib_") != std::string::npos ||
+             dir_name.find("slib_") != std::string::npos ||
+             dir_name.find("dlib_") != std::string::npos) {
+    open << (cuda_compile ? "cuda_add_library(" : "add_library(");
+    open << proj_name;
+    if (dir_name.find("slib_") != std::string::npos)
+      open << " STATIC";
+    else
+      open << " SHARED";
+  }
+  open << " ${cpp_files}";
+  if (!dir.moc_files.empty()) open << " ${moc_files}";
+  if (dir.files.find("qrc") != dir.files.end()) open << " ${qt_resources}";
+  open << ")" << std::endl << std::endl;
 
   open << "include_directories(" << proj_name << std::endl;
-  for (auto& d : dir.directories) open << "  " << d << std::endl;
-  for (auto& d : dir.include_dirs) open << "  " << d << std::endl;
+  for (auto& d : dir.directories)
+    if (!d.empty()) open << "  " << d << std::endl;
+  for (auto& d : dir.include_dirs)
+    if (!d.empty()) open << "  " << d << std::endl;
   for (auto& lib : dir.libraries)
-    open << "  " << libraries_[lib].include_dir << std::endl;
+    if (!libraries_[lib].include_dir.empty())
+      open << "  " << libraries_[lib].include_dir << std::endl;
   if (cuda_compile)
     open << "  "
          << "${CUDA_INCLUDE_DIRS}" << std::endl;
@@ -124,14 +165,14 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
   if (!dir.precomp_h.empty() && !dir.precomp_cc.empty()) {
     open << "if (MSVC)" << std::endl
          << "  set_target_properties(" << proj_name
-         << " PROPERTIES COMPILE_FLAGS \"/Y"
+         << " PROPERTIES COMPILE_FLAGS \"/Yu"
          << dir.precomp_h.substr(dir.precomp_h.find_last_of('/') + 1,
                                  dir.precomp_h.size())
          << "\")" << std::endl
          << "  set_source_files_properties(" << dir.precomp_cc
          << " PROPERTIES COMPILE_FLAGS \"/Yc"
-         << dir.precomp_cc.substr(dir.precomp_cc.find_last_of('/') + 1,
-                                  dir.precomp_cc.size())
+         << dir.precomp_h.substr(dir.precomp_h.find_last_of('/') + 1,
+                                 dir.precomp_h.size())
          << "\")" << std::endl
          << "endif(MSVC)";
   }

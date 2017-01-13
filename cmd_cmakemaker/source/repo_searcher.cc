@@ -37,6 +37,10 @@ void RepoSearcher::CollectEntry(
 
   if (std::experimental::filesystem::is_directory(entry)) {
     if (path.find("runnable_") != std::string::npos ||
+        path.find("cmd_") != std::string::npos ||
+        path.find("app_") != std::string::npos ||
+		path.find("slib_") != std::string::npos ||
+		path.find("dlib_") != std::string::npos ||
         path.find("lib_") != std::string::npos || subdir)
       dir.directories.emplace_back(path);
   } else if (std::experimental::filesystem::is_regular_file(entry)) {
@@ -52,15 +56,15 @@ void RepoSearcher::CollectEntry(
 
 void RepoSearcher::FindDependencies(
     std::vector<RepoSearcher::directory>& targets,
-	std::map<std::string, RepoSearcher::library>& libraries) {
+    std::map<std::string, RepoSearcher::library>& libraries) {
   std::vector<std::set<std::string>> include_files;
   for (auto& target : targets) {
     include_files.push_back(std::set<std::string>());
     for (auto& map : target.files) {
-      for (auto& file : map.second.fmap) {
-        for (auto& pair : file.second) {
+      for (auto& pair : map.second.fmap) {
+        for (auto& file : pair.second) {
           std::ifstream open(target.dir_name +
-                             pair.substr(pair.find_first_of('.'), pair.size()));
+                             file.substr(file.find_first_of('.'), file.size()));
           while (!open.fail() && !open.eof()) {
             std::string line = "";
             std::getline(open, line);
@@ -77,8 +81,12 @@ void RepoSearcher::FindDependencies(
                 stripped_name = line.substr(
                     line.find_first_of('"') + 1,
                     line.find_last_of('"') - line.find_first_of('"') - 1);
-              include_files.back().insert(stripped_name);
+              if (stripped_name.find("precomp") == std::string::npos)
+                include_files.back().insert(stripped_name);
             }
+
+            if (line.find("Q_OBJECT") != std::string::npos)
+              target.moc_files.insert(file);
           }
           open.close();
         }
@@ -99,9 +107,12 @@ void RepoSearcher::FindDependencies(
             if (include_files[i].find(
                     file.substr(file.find_last_of('/') + 1, file.size())) !=
                 include_files[i].end()) {
-              target_insert.dependencies.insert(
-                  target.dir_name.substr(target.dir_name.find_last_of('/') + 1,
-                                         target.dir_name.size()));
+              if (target.dir_name.find("runnable_") == std::string::npos &&
+                  target.dir_name.find("cmd_") == std::string::npos &&
+                  target.dir_name.find("app_") == std::string::npos)
+                target_insert.dependencies.insert(target.dir_name.substr(
+                    target.dir_name.find_last_of('/') + 1,
+                    target.dir_name.size()));
 
               auto incdir = file.substr(0, file.find_last_of('/'));
               incdir =

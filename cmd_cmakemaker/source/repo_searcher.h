@@ -23,9 +23,10 @@ class RepoSearcher {
 
   struct directory {
     std::string dir_name;
-	std::string precomp_h;
-	std::string precomp_cc;
+    std::string precomp_h;
+    std::string precomp_cc;
     std::map<std::string, filemap> files;
+	std::set<std::string> moc_files;
     std::set<std::string> libraries;
     std::set<std::string> dependencies;
     std::set<std::string> include_dirs;

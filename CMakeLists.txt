@@ -2,9 +2,17 @@
 cmake_minimum_required(VERSION 3.0)
 project(cmakemaker_solution C CXX)
 
-set (LIBRARY_OUTPUT_PATH Build_Output/Libs CACHE PATH "Lib path")
+set (LIBRARY_OUTPUT_PATH Build_Output/libs CACHE PATH "Lib path")
 set(EXECUTABLE_OUTPUT_PATH Build_Output/bin CACHE PATH "Exe path")
 mark_as_advanced(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
 add_definitions(-DUNICODE -D_UNICODE)
 
-add_subdirectory(./runnable_cmakemaker)
+if (WIN32)
+  add_definitions(-DWindowsBuild)
+  set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -MP")
+else(WIN32)
+  add_definitions(-DUnixBuild)
+  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC")
+endif(WIN32)
+
+add_subdirectory(./cmd_cmakemaker)
