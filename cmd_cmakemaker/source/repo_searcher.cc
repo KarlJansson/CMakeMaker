@@ -39,8 +39,8 @@ void RepoSearcher::CollectEntry(
     if (path.find("runnable_") != std::string::npos ||
         path.find("cmd_") != std::string::npos ||
         path.find("app_") != std::string::npos ||
-		path.find("slib_") != std::string::npos ||
-		path.find("dlib_") != std::string::npos ||
+        path.find("slib_") != std::string::npos ||
+        path.find("dlib_") != std::string::npos ||
         path.find("lib_") != std::string::npos || subdir)
       dir.directories.emplace_back(path);
   } else if (std::experimental::filesystem::is_regular_file(entry)) {
@@ -57,6 +57,8 @@ void RepoSearcher::CollectEntry(
 void RepoSearcher::FindDependencies(
     std::vector<RepoSearcher::directory>& targets,
     std::map<std::string, RepoSearcher::library>& libraries) {
+  std::string q_obj_string = "Q_";
+  q_obj_string += "OBJECT";
   std::vector<std::set<std::string>> include_files;
   for (auto& target : targets) {
     include_files.push_back(std::set<std::string>());
@@ -85,7 +87,7 @@ void RepoSearcher::FindDependencies(
                 include_files.back().insert(stripped_name);
             }
 
-            if (line.find("Q_OBJECT") != std::string::npos)
+            if (line.find(q_obj_string) != std::string::npos)
               target.moc_files.insert(file);
           }
           open.close();
