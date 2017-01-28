@@ -80,6 +80,7 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
   std::ofstream open(dir_name + "/CMakeLists.txt");
   std::string proj_name =
       dir_name.substr(dir_name.find_last_of('/') + 1, dir_name.size());
+  proj_name = dir_name.substr(dir_name.find_first_of('_') + 1, dir_name.size());
   std::vector<std::string> precomp_file_bundles, proj_names;
   proj_names.push_back(proj_name);
 
@@ -175,8 +176,9 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
     open << " ${cpp_files}";
     if (!dir.moc_files.empty()) open << " ${moc_files}";
     if (dir.files.find("qrc") != dir.files.end()) open << " ${qt_resources}";
-    open << ")" << std::endl << std::endl;
+    open << ")" << std::endl;
   }
+  open << std::endl;
 
   for (auto& p_name : proj_names) {
     open << "include_directories(" << p_name << std::endl;
@@ -193,7 +195,9 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
     open << ")" << std::endl << std::endl;
 
     open << "target_link_libraries(" << p_name << std::endl;
-    for (auto& dep : dir.dependencies) open << "  " << dep << std::endl;
+    for (auto& dep : dir.dependencies)
+      open << "  " << dep.substr(dep.find_first_of('_') + 1, dep.size())
+           << std::endl;
     for (auto& lib : dir.libraries)
       open << "  " << libraries_[lib].lib_dir << std::endl;
     if (cuda_compile)

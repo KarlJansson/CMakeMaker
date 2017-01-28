@@ -23,12 +23,12 @@ source_group(source FILES
   ./source/settings_parser.h
 )
 
-add_executable(cmd_cmakemaker ${cpp_files})
+add_executable(cmakemaker ${cpp_files})
 
-include_directories(cmd_cmakemaker
+include_directories(cmakemaker
   ./source
 )
 
-target_link_libraries(cmd_cmakemaker
+target_link_libraries(cmakemaker
 )
 
