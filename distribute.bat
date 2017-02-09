@@ -1,0 +1,1 @@
+xcopy ..\BuildFiles\public_cmakemaker\cmd_cmakemaker\Build_Output\bin\Release\cmakemaker.exe D:\Applications\Tools\cmakemaker.exe /Y

@@ -1,5 +1,13 @@
-rem __project_files_cmake_win64__
 cmakemaker
-mkdir __project_files_cmake_win64__& pushd __project_files_cmake_win64__
-cmake -G "Visual Studio 14 2015 Win64" ../
-popd
+
+if not exist ..\BuildFiles\ (
+  mkdir ..\BuildFiles\
+)
+
+if not exist ..\BuildFiles\public_cmakemaker\ (
+  mkdir ..\BuildFiles\public_cmakemaker\
+)
+
+cd ..\BuildFiles\public_cmakemaker\
+cmake -G "Visual Studio 14 2015 Win64" ../../public_cmakemaker/
+cd ..\..\public_cmakemaker\
