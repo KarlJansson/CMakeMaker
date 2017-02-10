@@ -261,6 +261,56 @@ void CmakeWriter::WriteSubdir(std::string dir_name,
         open << "\"\n";
       }
       if (!libs.empty()) open << ")\n\n";
+
+      auto add_cmake_copy_command = [&open, &configs](
+          std::string file_path, std::string debug_suffix, std::string ext,
+          std::string source_base, std::string dest_base, bool config_inc) {
+        open << "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n";
+        open << "    \"";
+        for (auto& conf : configs)
+          open << "$<$<CONFIG:" + conf + ">:" + source_base + file_path +
+                      (conf.compare("Debug") == 0 ? debug_suffix : "") + ext +
+                      ">";
+        open << "\"\n    \"";
+        for (auto& conf : configs)
+          open << "$<$<CONFIG:" + conf + ">:" + dest_base +
+                      (config_inc ? conf : "") + file_path +
+                      (conf.compare("Debug") == 0 ? debug_suffix : "") + ext +
+                      ">";
+        open << "\"\n";
+      };
+
+      auto add_cmake_make_dir_command = [&open, &configs](
+          std::string dir_path, std::string base_dir, bool config_inc) {
+        open << "  COMMAND ${CMAKE_COMMAND} ARGS -E make_directory\n";
+        open << "    \"";
+        for (auto& conf : configs)
+          open << "$<$<CONFIG:" + conf + ">:" + base_dir +
+                      (config_inc ? conf : "") +
+                      dir_path.substr(1, dir_path.size()) + "/>";
+        open << "\"\n";
+      };
+
+      if (!dir.files["qml"].fmap.empty()) {
+        open << "add_custom_command(TARGET " + p_name + " PRE_BUILD\n";
+        for (auto& path : dir.files["qml"].fmap) {
+          add_cmake_make_dir_command(
+              path.first, "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/",
+              true);
+          add_cmake_make_dir_command(path.first, "${CMAKE_CURRENT_BINARY_DIR}",
+                                     false);
+          for (auto& file : path.second) {
+            add_cmake_copy_command(
+                file.substr(1, file.size()), "", "",
+                "${CMAKE_CURRENT_SOURCE_DIR}",
+                "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/", true);
+            add_cmake_copy_command(file.substr(1, file.size()), "", "",
+                                   "${CMAKE_CURRENT_SOURCE_DIR}",
+                                   "${CMAKE_CURRENT_BINARY_DIR}", false);
+          }
+        }
+        open << ")\n\n";
+      }
     }
   }
 
