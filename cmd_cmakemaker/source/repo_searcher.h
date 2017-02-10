@@ -19,6 +19,8 @@ class RepoSearcher {
     std::vector<std::string> components;
     std::string include_dir;
     std::string lib_dir;
+    std::string dll_file;
+    std::string debug_suffix;
   };
 
   struct directory {
@@ -26,17 +28,19 @@ class RepoSearcher {
     std::string precomp_h;
     std::string precomp_cc;
     std::map<std::string, filemap> files;
-	std::set<std::string> moc_files;
+    std::set<std::string> moc_files;
     std::set<std::string> libraries;
     std::set<std::string> dependencies;
+    std::set<std::string> dependent;
     std::set<std::string> include_dirs;
     std::vector<std::string> directories;
   };
 
   directory SearchPath(std::string path);
   directory SearchPathSubdirs(std::string path);
-  void FindDependencies(std::vector<RepoSearcher::directory>& targets,
-	  std::map<std::string, RepoSearcher::library>& libraries);
+  void FindDependencies(
+      std::map<std::string, RepoSearcher::directory>& targets,
+      std::map<std::string, RepoSearcher::library>& libraries);
 
  private:
   void CollectEntry(

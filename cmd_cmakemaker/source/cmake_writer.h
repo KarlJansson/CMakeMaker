@@ -14,5 +14,7 @@ class CmakeWriter {
                          std::vector<std::string>& extensions);
 
   RepoSearcher searcher_;
+  RepoSearcher::directory main_dir_;
+  std::map<std::string, RepoSearcher::directory> targets_;
   std::map<std::string, RepoSearcher::library> libraries_;
 };

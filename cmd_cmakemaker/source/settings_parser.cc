@@ -24,6 +24,10 @@ void SettingsParser::ParseSettings(
           str_ptr = &tmp.include_dir;
         else if (left.find("lib_dir") != std::string::npos)
           str_ptr = &tmp.lib_dir;
+        else if (left.find("dll_file") != std::string::npos)
+          str_ptr = &tmp.dll_file;
+        else if (left.find("debug_suffix") != std::string::npos)
+          str_ptr = &tmp.debug_suffix;
 
         if (str_ptr)
           *str_ptr = right.substr(
