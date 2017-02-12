@@ -4,6 +4,7 @@
 #include <iterator>
 #include <sstream>
 #include "settings_parser.h"
+#include "test_target_writer.h"
 
 CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
   SettingsParser parse;
@@ -14,10 +15,19 @@ void CmakeWriter::WriteCmakeFiles() {
   main_dir_ = searcher_.SearchPath("./");
   WriteMain(main_dir_);
   for (auto& dir : main_dir_.directories)
-    targets_[dir] = searcher_.SearchPathSubdirs(dir);
+    if (dir.find("test_") == std::string::npos)
+      targets_[dir] = searcher_.SearchPathSubdirs(dir);
   searcher_.FindDependencies(targets_, libraries_);
 
-  for (auto& dir : main_dir_.directories) WriteSubdir(dir, targets_[dir]);
+  // Write non test targets
+  for (auto& dir : main_dir_.directories)
+    if (dir.find("test_") == std::string::npos) WriteSubdir(dir, targets_[dir]);
+
+  // Write test targets
+  auto test_target_writer = std::make_unique<TestTargetWriter>();
+  for (auto& dir : main_dir_.directories)
+    if (dir.find("test_") != std::string::npos)
+      test_target_writer->WriteTestTraget(dir, targets_, libraries_);
 }
 
 void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
@@ -69,7 +79,12 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
        << std::endl;
 
   for (auto& subdir : dir.directories)
-    open << "add_subdirectory(" << subdir << ")" << std::endl;
+    if (subdir.find("test_") == std::string::npos)
+      open << "add_subdirectory(" << subdir << ")" << std::endl;
+
+  for (auto& subdir : dir.directories)
+    if (subdir.find("test_") != std::string::npos)
+      open << "add_subdirectory(" << subdir << ")" << std::endl;
 
   open.close();
 }

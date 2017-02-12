@@ -32,3 +32,4 @@ else(WIN32)
 endif(WIN32)
 
 add_subdirectory(./cmd_cmakemaker)
+add_subdirectory(./test_testdriver)
