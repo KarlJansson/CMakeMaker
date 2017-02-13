@@ -50,25 +50,23 @@ void TesttargetWriter::WriteTestTarget(
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.cc",
                                   expected_precomp_cc);
 
-  if (MainUpdateNeeded(dir_name, targets)) {
-    std::ofstream test_main(dir_name + "/test_main.cc");
+  std::string expected_test_main = "#include \"precomp.h\"\n\n";
+  for (auto& dir : targets)
+    for (auto& obj_dir : dir.second.files["h"].fmap)
+      for (auto& obj : obj_dir.second)
+        if (obj.find("test_") != std::string::npos)
+          expected_test_main +=
+              "#include \"" +
+              obj.substr(obj.find_last_of('/') + 1, obj.size()) + "\"\n";
 
-    test_main << "#include \"precomp.h\"\n\n";
-    for (auto& dir : targets)
-      for (auto& obj_dir : dir.second.files["h"].fmap)
-        for (auto& obj : obj_dir.second)
-          if (obj.find("test_") != std::string::npos)
-            test_main << "#include \"" +
-                             obj.substr(obj.find_last_of('/') + 1, obj.size()) +
-                             "\"\n";
+  expected_test_main +=
+      "\nint main(int argc, char** args) {\n"
+      "  ::testing::InitGoogleTest(&argc, args);\n"
+      "  return RUN_ALL_TESTS();\n"
+      "}";
 
-    test_main << "\nint main(int argc, char** args) {\n"
-              << "  ::testing::InitGoogleTest(&argc, args);\n"
-              << "  return RUN_ALL_TESTS();\n"
-              << "}";
-
-    test_main.close();
-  }
+  CommonWriter::UpdateIfDifferent(dir_name + "/test_main.cc",
+                                  expected_test_main);
 
   std::string expected = CommonWriter::cmake_header_ + "\n";
   std::map<std::string, std::set<std::string>> all_finds;
