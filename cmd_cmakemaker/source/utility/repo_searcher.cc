@@ -1,7 +1,6 @@
+#include "precomp.h"
+
 #include "repo_searcher.h"
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 RepoSearcher::RepoSearcher() {}
 

@@ -1,5 +1,6 @@
+#include "precomp.h"
+
 #include "settings_parser.h"
-#include <fstream>
 
 void SettingsParser::ParseSettings(
     std::string path, std::map<std::string, RepoSearcher::library>& libraries) {

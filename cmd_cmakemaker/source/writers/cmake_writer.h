@@ -1,5 +1,6 @@
 #pragma once
 #include "repo_searcher.h"
+#include "common_writer.h"
 
 class CmakeWriter {
  public:
@@ -9,9 +10,6 @@ class CmakeWriter {
 
  private:
   void WriteMain(RepoSearcher::directory& dir);
-  void WriteSubdir(std::string dir_name, RepoSearcher::directory& dir);
-  void WriteSourceGroups(std::ofstream& open, RepoSearcher::directory& dir,
-                         std::vector<std::string>& extensions);
 
   RepoSearcher searcher_;
   RepoSearcher::directory main_dir_;
