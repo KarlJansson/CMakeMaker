@@ -1,52 +1,54 @@
 #include "precomp.h"
 
 #include "common_writer.h"
-#include "test_target_writer.h"
+#include "testtarget_writer.h"
 
-void TestTargetWriter::WriteTestTarget(
+void TesttargetWriter::WriteTestTarget(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory>& targets,
     std::map<std::string, RepoSearcher::library>& libraries) {
   std::string proj_name =
       dir_name.substr(dir_name.find_last_of('/') + 1, dir_name.size());
   proj_name = dir_name.substr(dir_name.find_first_of('_') + 1, dir_name.size());
-
+  std::set<std::string> include_dirs;
   std::vector<std::string> ext = {"cc", "cpp"};
 
-  std::string std_includes =
-      "#include <memory>\n"
-      "#include <string>\n"
-      "#include <vector>\n"
-      "#include <array>\n"
-      "#include <set>\n"
-      "#include <unordered_set>\n"
-      "#include <map>\n"
-      "#include <unordered_map>\n"
-      "#include <fstream>\n"
-      "#include <sstream>\n"
-      "#include <iostream>\n"
-      "#include <algorithm>\n"
-      "#include <chrono>\n"
-      "#include <random>\n"
-      "#include <iterator>\n"
-      "#include <locale>\n"
-      "#include <atomic>\n"
-      "#include <mutex>\n"
-      "#include <future>\n"
-      "#include <condition_variable>\n"
-      "#include <complex>\n"
-      "#include <numeric>\n\n";
+  std::set<std::string> all_includes;
+  for (auto& target : targets)
+    for (auto& file : target.second.include_files) all_includes.insert(file);
 
-  if (!std::experimental::filesystem::exists(dir_name + "/precomp.h")) {
-    std::ofstream precomp_h(dir_name + "/precomp.h");
-    precomp_h << "#define DLLExport\n\n";
-    precomp_h << "#include <gtest/gtest.h>\n\n" << std_includes;
-    precomp_h.close();
+  std::string precomp_includes = "";
 
-    std::ofstream precomp_cc(dir_name + "/precomp.cc");
-    precomp_cc << "#include \"precomp.h\"\n\n";
-    precomp_cc.close();
+  if (std::experimental::filesystem::exists("./source_shared")) {
+    include_dirs.insert("../source_shared");
+    for (auto& p : std::experimental::filesystem::recursive_directory_iterator(
+             "./source_shared")) {
+      if (std::experimental::filesystem::is_regular_file(p)) {
+        std::stringstream path_stream;
+        path_stream << p;
+        std::string path = path_stream.str();
+        std::replace(path.begin(), path.end(), '\\', '/');
+
+        precomp_includes +=
+            "#include \"" + path.substr(path.find_last_of('/') + 1) + "\"\n";
+      }
+    }
   }
+
+  for (auto& include : all_includes)
+    precomp_includes += "#include " + include + "\n";
+
+  precomp_includes += "\n";
+
+  std::string expected_precomp_h =
+      "#include <gtest/gt"
+      "est.h>\n\n" +
+      precomp_includes;
+  CommonWriter::UpdateIfDifferent(dir_name + "/precomp.h", expected_precomp_h);
+
+  std::string expected_precomp_cc = "#include \"precomp.h\"\n\n";
+  CommonWriter::UpdateIfDifferent(dir_name + "/precomp.cc",
+                                  expected_precomp_cc);
 
   if (MainUpdateNeeded(dir_name, targets)) {
     std::ofstream test_main(dir_name + "/test_main.cc");
@@ -68,20 +70,28 @@ void TestTargetWriter::WriteTestTarget(
     test_main.close();
   }
 
-  std::string expected =
-      CommonWriter::cmake_header_ + "\nfind_package(GTest)\n";
+  std::string expected = CommonWriter::cmake_header_ + "\n";
+  std::map<std::string, std::set<std::string>> all_finds;
+  all_finds["GTest"] = {};
+
   for (auto& dir : targets) {
     for (auto& lib : dir.second.libraries) {
       auto& lib_info = libraries[lib];
+
       if (!lib_info.find_command.empty()) {
-        expected += "find_package(" + libraries[lib].find_command;
-        if (!lib_info.components.empty()) {
-          expected += " COMPONENTS\n";
-          for (auto& mod : lib_info.components) expected += "  " + mod + "\n";
-        }
-        expected += ")\n";
+        auto& ref = all_finds[lib_info.find_command];
+        for (auto& comp : lib_info.components) ref.insert(comp);
       }
     }
+  }
+
+  for (auto& find : all_finds) {
+    expected += "find_package(" + find.first;
+    if (!find.second.empty()) {
+      expected += " COMPONENTS\n";
+      for (auto& mod : find.second) expected += "  " + mod + "\n";
+    }
+    expected += ")\n";
   }
 
   expected +=
@@ -95,7 +105,6 @@ void TestTargetWriter::WriteTestTarget(
       "add_executable(" +
       proj_name + " ${cpp_files})\n\n";
 
-  std::set<std::string> include_dirs;
   for (auto& dir : targets) {
     for (auto& d : dir.second.directories)
       if (!d.empty())
@@ -208,7 +217,7 @@ void TestTargetWriter::WriteTestTarget(
   CommonWriter::UpdateIfDifferent(dir_name + "/CMakeLists.txt", expected);
 }
 
-bool TestTargetWriter::MainUpdateNeeded(
+bool TesttargetWriter::MainUpdateNeeded(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory>& targets) {
   if (!std::experimental::filesystem::exists(dir_name + "/test_main.cc"))

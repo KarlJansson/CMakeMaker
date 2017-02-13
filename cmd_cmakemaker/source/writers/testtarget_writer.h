@@ -1,10 +1,10 @@
 #pragma once
 #include "repo_searcher.h"
 
-class TestTargetWriter {
+class TesttargetWriter {
  public:
-  TestTargetWriter() = default;
-  ~TestTargetWriter() = default;
+  TesttargetWriter() = default;
+  ~TesttargetWriter() = default;
 
   void WriteTestTarget(std::string dir_name,
                        std::map<std::string, RepoSearcher::directory> &targets,

@@ -2,7 +2,6 @@
 cmake_minimum_required(VERSION 3.6)
 
 find_package(GTest)
-find_package(GTest)
 
 set(cpp_files
   test_main.cc
@@ -20,6 +19,7 @@ include_directories(testdriver
   ../cmd_cmakemaker/source/utility
   ../cmd_cmakemaker/source/writers
   ../cmd_cmakemaker/test
+  ../source_shared
 )
 
 target_link_libraries(testdriver
@@ -29,7 +29,7 @@ target_link_libraries(testdriver
   ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/repo_searcher.obj
   ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/settings_parser.obj
   ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/subdir_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/test_target_writer.obj
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/testtarget_writer.obj
   ${GTEST_LIBRARIES}
 )
 

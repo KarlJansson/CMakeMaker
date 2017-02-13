@@ -3,7 +3,7 @@
 #include "cmake_writer.h"
 #include "settings_parser.h"
 #include "subdir_writer.h"
-#include "test_target_writer.h"
+#include "testtarget_writer.h"
 
 CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
   SettingsParser parse;
@@ -25,10 +25,10 @@ void CmakeWriter::WriteCmakeFiles() {
       subdir_writer->WriteSubdir(dir, targets_[dir], targets_, libraries_);
 
   // Write test targets
-  auto test_target_writer = std::make_unique<TestTargetWriter>();
+  auto testtarget_writer = std::make_unique<TesttargetWriter>();
   for (auto& dir : main_dir_.directories)
     if (dir.find("test_") != std::string::npos)
-      test_target_writer->WriteTestTarget(dir, targets_, libraries_);
+      testtarget_writer->WriteTestTarget(dir, targets_, libraries_);
 }
 
 void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {

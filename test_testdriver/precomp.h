@@ -1,27 +1,23 @@
-#define DLLExport
-
 #include <gtest/gtest.h>
 
-#include <memory>
-#include <string>
-#include <vector>
-#include <array>
-#include <set>
-#include <unordered_set>
-#include <map>
-#include <unordered_map>
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include "global_precomp.h"
 #include <algorithm>
-#include <chrono>
-#include <random>
-#include <iterator>
-#include <locale>
 #include <atomic>
+#include <bitset>
+#include <chrono>
+#include <experimental\filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <math.h>
+#include <memory>
 #include <mutex>
-#include <future>
-#include <condition_variable>
-#include <complex>
 #include <numeric>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
