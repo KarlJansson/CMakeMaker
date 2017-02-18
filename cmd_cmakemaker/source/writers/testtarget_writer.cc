@@ -21,8 +21,8 @@ void TesttargetWriter::WriteTestTarget(
 
   if (std::experimental::filesystem::exists("./source_shared")) {
     include_dirs.insert("../source_shared");
-    for (auto& p : std::experimental::filesystem::recursive_directory_iterator(
-             "./source_shared")) {
+    for (auto& p :
+         std::experimental::filesystem::directory_iterator("./source_shared")) {
       if (std::experimental::filesystem::is_regular_file(p)) {
         std::stringstream path_stream;
         path_stream << p;

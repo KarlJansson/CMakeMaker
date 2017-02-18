@@ -12,11 +12,12 @@ CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
 
 void CmakeWriter::WriteCmakeFiles() {
   main_dir_ = searcher_.SearchPath("./");
-  WriteMain(main_dir_);
+
   for (auto& dir : main_dir_.directories)
     if (dir.find("test_") == std::string::npos)
       targets_[dir] = searcher_.SearchPathSubdirs(dir);
   searcher_.FindDependencies(targets_, libraries_);
+  WriteMain(main_dir_);
 
   // Write non test targets
   auto subdir_writer = std::make_unique<SubdirWriter>();
@@ -68,14 +69,53 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
       "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -fPIC\")\n"
-      "endif(WIN32)\n\n";
+      "endif(WIN32)\n\n"
 
-  expected +=
       "add_custom_target(\n"
       "  ALL_PRE_BUILD\n"
       "  COMMAND cmakemaker.exe\n"
       "  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
       ")\n\n";
+
+  std::vector<std::string> copy_types = {"qml"};
+  for (auto target : targets_) {
+    for (auto& type : copy_types) {
+      if (!target.second.files[type].fmap.empty()) {
+        expected += "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n";
+        for (auto& path : target.second.files[type].fmap) {
+          CommonWriter::AddMakeDirCommand(
+              path.first,
+              "${CMAKE_CURRENT_BINARY_DIR}" +
+                  target.first.substr(1, target.first.size()) +
+                  "/Build_Output/bin/",
+              true, expected);
+          CommonWriter::AddMakeDirCommand(
+              path.first,
+              "${CMAKE_CURRENT_BINARY_DIR}" +
+                  target.first.substr(1, target.first.size()),
+              false, expected);
+          for (auto& file : path.second) {
+            CommonWriter::AddCopyCommand(
+                file.substr(1, file.size()), "", "",
+                "${CMAKE_CURRENT_SOURCE_DIR}" +
+                    target.first.substr(1, target.first.size()),
+                "${CMAKE_CURRENT_BINARY_DIR}" +
+                    target.first.substr(1, target.first.size()) +
+                    "/Build_Output/bin/",
+                true, expected);
+            CommonWriter::AddCopyCommand(
+                file.substr(1, file.size()), "", "",
+                "${CMAKE_CURRENT_SOURCE_DIR}" +
+                    target.first.substr(1, target.first.size()),
+                "${CMAKE_CURRENT_BINARY_DIR}" +
+                    target.first.substr(1, target.first.size()),
+                false, expected);
+          }
+        }
+        expected += ")\n\n";
+      }
+    }
+  }
 
   std::vector<std::string> test_targets, exe_targets, lib_tragets;
   for (auto& subdir : dir.directories) {

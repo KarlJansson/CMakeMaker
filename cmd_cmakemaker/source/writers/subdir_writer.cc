@@ -183,29 +183,6 @@ void SubdirWriter::WriteSubdir(
         expected += "\"\n";
       }
       if (!libs.empty()) expected += ")\n\n";
-
-      if (!dir.files["qml"].fmap.empty()) {
-        expected += "add_custom_command(TARGET " + p_name + " PRE_BUILD\n";
-        for (auto& path : dir.files["qml"].fmap) {
-          CommonWriter::AddMakeDirCommand(
-              path.first, "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/", true,
-              expected);
-          CommonWriter::AddMakeDirCommand(
-              path.first, "${CMAKE_CURRENT_BINARY_DIR}", false, expected);
-          for (auto& file : path.second) {
-            CommonWriter::AddCopyCommand(
-                file.substr(1, file.size()), "", "",
-                "${CMAKE_CURRENT_SOURCE_DIR}",
-                "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/", true,
-                expected);
-            CommonWriter::AddCopyCommand(file.substr(1, file.size()), "", "",
-                                         "${CMAKE_CURRENT_SOURCE_DIR}",
-                                         "${CMAKE_CURRENT_BINARY_DIR}", false,
-                                         expected);
-          }
-        }
-        expected += ")\n\n";
-      }
     }
   }
 
