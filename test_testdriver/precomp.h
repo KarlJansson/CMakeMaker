@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "global_precomp.h"
 #include <algorithm>
 #include <atomic>
 #include <bitset>
@@ -20,4 +19,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "global_precomp.h"
 

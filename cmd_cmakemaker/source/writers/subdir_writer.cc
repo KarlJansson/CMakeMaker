@@ -14,7 +14,6 @@ void SubdirWriter::WriteSubdir(
   proj_names.push_back(proj_name);
 
   std::string expected = CommonWriter::cmake_header_ + "\n";
-
   bool cuda_compile = dir.files["cu"].fmap.empty() ? false : true;
 
   if (cuda_compile) expected += "find_package(CUDA)\n";
@@ -108,14 +107,20 @@ void SubdirWriter::WriteSubdir(
   expected += "\n";
 
   for (auto& p_name : proj_names) {
-    expected += "include_directories(" + p_name + "\n";
+    std::set<std::string> include_dirs;
+    if (std::experimental::filesystem::exists("./source_shared"))
+      include_dirs.insert("../source_shared");
+
     for (auto& d : dir.directories)
-      if (!d.empty()) expected += "  " + d + "\n";
+      if (!d.empty()) include_dirs.insert(d);
     for (auto& d : dir.include_dirs)
-      if (!d.empty()) expected += "  " + d + "\n";
+      if (!d.empty()) include_dirs.insert(d);
     for (auto& lib : dir.libraries)
       if (!libraries[lib].include_dir.empty())
-        expected += "  " + libraries[lib].include_dir + "\n";
+        include_dirs.insert(libraries[lib].include_dir);
+
+    expected += "include_directories(" + p_name + "\n";
+    for (auto& inc_dir : include_dirs) expected += "  " + inc_dir + "\n";
     if (cuda_compile) expected += "  ${CUDA_INCLUDE_DIRS}\n";
     expected += ")\n\n";
 

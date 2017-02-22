@@ -35,6 +35,8 @@ void TesttargetWriter::WriteTestTarget(
     }
   }
 
+  precomp_includes += "\n";
+
   for (auto& include : all_includes)
     precomp_includes += "#include " + include + "\n";
 

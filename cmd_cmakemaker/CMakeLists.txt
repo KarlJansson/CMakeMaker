@@ -61,6 +61,7 @@ add_msvc_precompiled_header("precomp.h" "./precomp/precomp.cc" cpp_files)
 add_executable(cmakemaker ${cpp_files})
 
 include_directories(cmakemaker
+  ../source_shared
   ./precomp
   ./source
   ./source/utility
