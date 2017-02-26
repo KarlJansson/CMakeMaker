@@ -94,6 +94,7 @@ void RepoSearcher::ProcessFile(
   std::string include_encap;
   std::ifstream open(target.dir_name +
                      file.substr(file.find_first_of('.'), file.size()));
+
   while (!open.fail() && !open.eof()) {
     std::string line;
     std::getline(open, line);
@@ -123,7 +124,7 @@ void RepoSearcher::ProcessFile(
         if (stripped_name.find("precomp") == std::string::npos) {
           include_files.insert(
               stripped_name.substr(1, stripped_name.size() - 2));
-          if (line[0] == '#') target.include_files.insert(stripped_name);
+          if (line[0] == '#') target.include_files[stripped_name] = order_++;
         }
       }
     }

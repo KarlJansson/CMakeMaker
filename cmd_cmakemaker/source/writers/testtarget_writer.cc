@@ -13,9 +13,16 @@ void TesttargetWriter::WriteTestTarget(
   std::set<std::string> include_dirs;
   std::vector<std::string> ext = {"cc", "cpp"};
 
-  std::set<std::string> all_includes;
-  for (auto& target : targets)
-    for (auto& file : target.second.include_files) all_includes.insert(file);
+  std::set<std::string> added;
+  std::map<int, std::string> all_includes;
+  for (auto& target : targets) {
+    for (auto& file : target.second.include_files) {
+      if (added.find(file.first) == added.end()) {
+        all_includes[file.second] = file.first;
+        added.insert(file.first);
+      }
+    }
+  }
 
   std::string precomp_includes = "";
 
@@ -38,7 +45,7 @@ void TesttargetWriter::WriteTestTarget(
   precomp_includes += "\n";
 
   for (auto& include : all_includes)
-    precomp_includes += "#include " + include + "\n";
+    precomp_includes += "#include " + include.second + "\n";
 
   precomp_includes += "\n";
 

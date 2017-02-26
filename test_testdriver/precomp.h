@@ -1,24 +1,19 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
-#include <atomic>
+#include "global_precomp.h"
+
+#include <math.h>
+#include <string>
+#include <set>
 #include <bitset>
-#include <chrono>
-#include <experimental\filesystem>
+#include <vector>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <map>
-#include <math.h>
 #include <memory>
 #include <mutex>
 #include <numeric>
-#include <set>
 #include <sstream>
-#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
-
-#include "global_precomp.h"
 

@@ -33,7 +33,7 @@ class RepoSearcher {
     std::set<std::string> dependencies;
     std::set<std::string> dependent;
     std::set<std::string> include_dirs;
-    std::set<std::string> include_files;
+    std::map<std::string, int> include_files;
     std::vector<std::string> directories;
   };
 
@@ -51,4 +51,6 @@ class RepoSearcher {
   void CollectEntry(
       const std::experimental::filesystem::v1::directory_entry& entry,
       RepoSearcher::directory& dir, std::string& dir_name, bool subdir);
+
+  int order_ = 0;
 };
