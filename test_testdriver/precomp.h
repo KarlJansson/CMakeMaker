@@ -3,10 +3,10 @@
 #include "global_precomp.h"
 
 #include <math.h>
-#include <string>
-#include <set>
+#include <algorithm>
+#include <atomic>
 #include <bitset>
-#include <vector>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -16,4 +16,9 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <experimental\filesystem>
+#include <set>
+#include <vector>
+#include <map>
+#include <string>
 

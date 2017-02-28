@@ -21,13 +21,16 @@ void SettingsParser::ParseSettings(
           str_ptr = &tmp.name;
         else if (left.find("find_command") != std::string::npos)
           str_ptr = &tmp.find_command;
-        else if (left.find("include_dir") != std::string::npos)
-          str_ptr = &tmp.include_dir;
-        else if (left.find("lib_dir") != std::string::npos)
-          str_ptr = &tmp.lib_dir;
-        else if (left.find("dll_file") != std::string::npos)
-          str_ptr = &tmp.dll_file;
-        else if (left.find("debug_suffix") != std::string::npos)
+        else if (left.find("include_dir") != std::string::npos) {
+          tmp.includes.push_back("");
+          str_ptr = &tmp.includes.back();
+        } else if (left.find("lib_dir") != std::string::npos) {
+          tmp.libs.push_back("");
+          str_ptr = &tmp.libs.back();
+        } else if (left.find("dll_file") != std::string::npos) {
+          tmp.dlls.push_back("");
+          str_ptr = &tmp.dlls.back();
+        } else if (left.find("debug_suffix") != std::string::npos)
           str_ptr = &tmp.debug_suffix;
 
         if (str_ptr)

@@ -17,9 +17,9 @@ class RepoSearcher {
     std::string name;
     std::string find_command;
     std::vector<std::string> components;
-    std::string include_dir;
-    std::string lib_dir;
-    std::string dll_file;
+    std::vector<std::string> includes;
+    std::vector<std::string> libs;
+    std::vector<std::string> dlls;
     std::string debug_suffix;
   };
 

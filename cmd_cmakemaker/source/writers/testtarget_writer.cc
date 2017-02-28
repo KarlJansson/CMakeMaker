@@ -119,8 +119,7 @@ void TesttargetWriter::WriteTestTarget(
     for (auto& d : dir.second.include_dirs)
       if (!d.empty()) include_dirs.insert(d);
     for (auto& lib : dir.second.libraries)
-      if (!libraries[lib].include_dir.empty())
-        include_dirs.insert(libraries[lib].include_dir);
+      for (auto& inc : libraries[lib].includes) include_dirs.insert(inc);
   }
   include_dirs.insert("${GTEST_INCLUDE_DIRS}");
 
@@ -134,7 +133,7 @@ void TesttargetWriter::WriteTestTarget(
         dir.first.substr(dir.first.find_last_of('/') + 1, dir.first.size());
 
     for (auto& lib : dir.second.libraries)
-      link_libraries.insert(libraries[lib].lib_dir);
+      for (auto& l : libraries[lib].libs) link_libraries.insert(l);
     for (auto& ext : ext) {
       for (auto& obj_dir : dir.second.files[ext].fmap) {
         for (auto& obj : obj_dir.second) {
@@ -182,32 +181,33 @@ void TesttargetWriter::WriteTestTarget(
     std::set<std::string> libs;
     for (auto& dep : dir.second.dependencies)
       for (auto& lib : targets["./" + dep].libraries)
-        if (!libraries[lib].dll_file.empty()) libs.insert(lib);
+        if (!libraries[lib].dlls.empty()) libs.insert(lib);
 
     for (auto& lib : dir.second.libraries)
-      if (!libraries[lib].dll_file.empty()) libs.insert(lib);
+      if (!libraries[lib].dlls.empty()) libs.insert(lib);
 
     if (!libs.empty())
       expected += "add_custom_command(TARGET " + proj_name + " POST_BUILD\n";
     for (auto& lib : libs) {
-      expected +=
-          "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n    \"";
-      for (auto& conf : CommonWriter::configs_)
+      for (auto& dll : libraries[lib].dlls) {
         expected +=
-            "$<$<CONFIG:" + conf + ">:" + libraries[lib].dll_file +
-            (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
-            ".dll>";
-      expected += "\"\n    \"";
-      for (auto& conf : CommonWriter::configs_)
-        expected +=
-            "$<$<CONFIG:" + conf +
-            ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/" + conf + "/" +
-            libraries[lib].dll_file.substr(
-                libraries[lib].dll_file.find_last_of('/') + 1,
-                libraries[lib].dll_file.size()) +
-            (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
-            ".dll>";
-      expected += "\"\n";
+            "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n    \"";
+
+        for (auto& conf : CommonWriter::configs_)
+          expected +=
+              "$<$<CONFIG:" + conf + ">:" + dll +
+              (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
+              ".dll>";
+        expected += "\"\n    \"";
+        for (auto& conf : CommonWriter::configs_)
+          expected +=
+              "$<$<CONFIG:" + conf +
+              ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/" + conf + "/" +
+              dll.substr(dll.find_last_of('/') + 1, dll.size()) +
+              (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
+              ".dll>";
+        expected += "\"\n";
+      }
     }
     if (!libs.empty()) expected += ")\n\n";
   }
