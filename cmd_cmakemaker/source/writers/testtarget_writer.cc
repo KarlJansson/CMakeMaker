@@ -189,22 +189,31 @@ void TesttargetWriter::WriteTestTarget(
     if (!libs.empty())
       expected += "add_custom_command(TARGET " + proj_name + " POST_BUILD\n";
     for (auto& lib : libs) {
-      for (auto& dll : libraries[lib].dlls) {
+      for (int i = 0; i < libraries[lib].dlls.size(); ++i) {
+        auto& dll = libraries[lib].dlls[i];
+        auto& debug_dll = libraries[lib].debug_dlls.size() > i
+                              ? libraries[lib].debug_dlls[i]
+                              : dll;
         expected +=
             "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n    \"";
 
         for (auto& conf : CommonWriter::configs_)
-          expected +=
-              "$<$<CONFIG:" + conf + ">:" + dll +
-              (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
-              ".dll>";
+          expected += "$<$<CONFIG:" + conf + ">:" +
+                      (conf.compare("Debug") == 0
+                           ? debug_dll + libraries[lib].debug_suffix
+                           : dll) +
+                      ".dll>";
         expected += "\"\n    \"";
         for (auto& conf : CommonWriter::configs_)
           expected +=
               "$<$<CONFIG:" + conf +
               ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/" + conf + "/" +
-              dll.substr(dll.find_last_of('/') + 1, dll.size()) +
-              (conf.compare("Debug") == 0 ? libraries[lib].debug_suffix : "") +
+
+              (conf.compare("Debug") == 0
+                   ? debug_dll.substr(debug_dll.find_last_of('/') + 1,
+                                      debug_dll.size()) +
+                         libraries[lib].debug_suffix
+                   : dll.substr(dll.find_last_of('/') + 1, dll.size())) +
               ".dll>";
         expected += "\"\n";
       }

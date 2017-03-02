@@ -27,9 +27,13 @@ void SettingsParser::ParseSettings(
         } else if (left.find("lib_dir") != std::string::npos) {
           tmp.libs.push_back("");
           str_ptr = &tmp.libs.back();
-        } else if (left.find("dll_file") != std::string::npos) {
+        } else if (left.find("dll_file") != std::string::npos ||
+                   left.find("dll_release") != std::string::npos) {
           tmp.dlls.push_back("");
           str_ptr = &tmp.dlls.back();
+        } else if (left.find("dll_debug") != std::string::npos) {
+          tmp.debug_dlls.push_back("");
+          str_ptr = &tmp.debug_dlls.back();
         } else if (left.find("debug_suffix") != std::string::npos)
           str_ptr = &tmp.debug_suffix;
 

@@ -20,6 +20,7 @@ class RepoSearcher {
     std::vector<std::string> includes;
     std::vector<std::string> libs;
     std::vector<std::string> dlls;
+	std::vector<std::string> debug_dlls;
     std::string debug_suffix;
   };
 
