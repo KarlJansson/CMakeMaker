@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+#include "benchmarktarget_writer.h"
 #include "cmake_writer.h"
 #include "settings_parser.h"
 #include "subdir_writer.h"
@@ -14,16 +15,24 @@ void CmakeWriter::WriteCmakeFiles() {
   main_dir_ = searcher_.SearchPath("./");
 
   for (auto& dir : main_dir_.directories)
-    if (dir.find("test_") == std::string::npos)
+    if (dir.find("benchmark_") == std::string::npos &&
+        dir.find("test_") == std::string::npos)
       targets_[dir] = searcher_.SearchPathSubdirs(dir);
   searcher_.FindDependencies(targets_, libraries_);
   WriteMain(main_dir_);
 
-  // Write non test targets
+  // Write non test and benchmark targets
   auto subdir_writer = std::make_unique<SubdirWriter>();
   for (auto& dir : main_dir_.directories)
-    if (dir.find("test_") == std::string::npos)
+    if (dir.find("benchmark_") == std::string::npos &&
+        dir.find("test_") == std::string::npos)
       subdir_writer->WriteSubdir(dir, targets_[dir], targets_, libraries_);
+
+  // Write benchmark targets
+  auto benchmarktarget_writer = std::make_unique<BenchmarktargetWriter>();
+  for (auto& dir : main_dir_.directories)
+    if (dir.find("benchmark_") != std::string::npos)
+      benchmarktarget_writer->WriteBenchmarkTarget(dir, targets_, libraries_);
 
   // Write test targets
   auto testtarget_writer = std::make_unique<TesttargetWriter>();
@@ -64,7 +73,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
       "if (WIN32)\n"
       "  add_definitions(-DWindowsBuild)\n"
-      "  set(CMAKE_CXX_FLAGS_RELEASE  \"${CMAKE_CXX_FLAGS_RELEASE} -MP\")\n"
+      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -MP\")\n"
 
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
@@ -117,10 +126,13 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
     }
   }
 
-  std::vector<std::string> test_targets, exe_targets, lib_tragets;
+  std::vector<std::string> test_targets, benchmark_targets, exe_targets,
+      lib_tragets;
   for (auto& subdir : dir.directories) {
     if (subdir.find("test_") != std::string::npos)
       test_targets.push_back(subdir);
+    else if (subdir.find("benchmark_") != std::string::npos)
+      benchmark_targets.push_back(subdir);
     else if (subdir.find("lib_") != std::string::npos ||
              subdir.find("slib_") != std::string::npos ||
              subdir.find("dlib_") != std::string::npos)
@@ -136,6 +148,8 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
   for (auto& subdir : lib_tragets)
     expected += "add_subdirectory(" + subdir + ")\n";
   for (auto& subdir : test_targets)
+    expected += "add_subdirectory(" + subdir + ")\n";
+  for (auto& subdir : benchmark_targets)
     expected += "add_subdirectory(" + subdir + ")\n";
 
   std::string default_target = "";

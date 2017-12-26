@@ -158,6 +158,7 @@ void RepoSearcher::CollectEntry(
         path.find("cmd_") != std::string::npos ||
         path.find("app_") != std::string::npos ||
         path.find("test_") != std::string::npos ||
+        path.find("benchmark_") != std::string::npos ||
         path.find("slib_") != std::string::npos ||
         path.find("dlib_") != std::string::npos ||
         path.find("lib_") != std::string::npos || subdir)

@@ -13,19 +13,23 @@ const std::string CommonWriter::cmake_header_ =
 void CommonWriter::UpdateIfDifferent(std::string file_path,
                                      std::string& expected) {
   bool update = true;
+  std::string check_str;
   if (std::experimental::filesystem::exists(file_path)) {
-    std::ifstream main_check(file_path);
+    std::ifstream main_check(file_path, std::ios::binary);
 
-    std::string check_str;
     main_check.seekg(0, std::ios::end);
-    check_str.reserve(main_check.tellg());
+    check_str.assign(main_check.tellg(), ' ');
     main_check.seekg(0, std::ios::beg);
-
-    check_str.assign((std::istreambuf_iterator<char>(main_check)),
-                     std::istreambuf_iterator<char>());
+    main_check.read(&check_str[0], check_str.size());
     main_check.close();
 
-    if (expected.compare(check_str) == 0) update = false;
+    // Remove windows style endline crap
+    check_str.erase(std::remove(check_str.begin(), check_str.end(), '\r'),
+                    check_str.end());
+
+    if (expected.size() == check_str.size())
+      if (std::memcmp(expected.data(), check_str.data(), expected.size()) == 0)
+        update = false;
   }
 
   if (update) {

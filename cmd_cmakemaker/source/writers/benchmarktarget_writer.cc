@@ -1,9 +1,9 @@
 #include "precomp.h"
 
+#include "benchmarktarget_writer.h"
 #include "common_writer.h"
-#include "testtarget_writer.h"
 
-void TesttargetWriter::WriteTestTarget(
+void BenchmarktargetWriter::WriteBenchmarkTarget(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory>& targets,
     std::map<std::string, RepoSearcher::library>& libraries) {
@@ -16,7 +16,7 @@ void TesttargetWriter::WriteTestTarget(
   std::set<std::string> added;
   std::map<int, std::string> all_includes;
   for (auto& target : targets) {
-    if (target.first.find("benchmark_") != std::string::npos) continue;
+    if (target.first.find("test_") != std::string::npos) continue;
     for (auto& file : target.second.include_files) {
       if (added.find(file.first) == added.end()) {
         all_includes[file.second] = file.first;
@@ -51,39 +51,32 @@ void TesttargetWriter::WriteTestTarget(
   precomp_includes += "\n";
 
   std::string expected_precomp_h =
-      "#include <gtest/gt"
-      "est.h>\n\n" +
-      precomp_includes;
+      "#include <benchmark/benchmark.h>\n\n" + precomp_includes;
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.h", expected_precomp_h);
 
   std::string expected_precomp_cc = "#include \"precomp.h\"\n\n";
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.cc",
                                   expected_precomp_cc);
 
-  std::string expected_test_main = "#include \"precomp.h\"\n\n";
+  std::string expected_benchmark_main = "#include \"precomp.h\"\n\n";
   for (auto& dir : targets)
     for (auto& obj_dir : dir.second.files["h"].fmap)
       for (auto& obj : obj_dir.second)
-        if (obj.find("test_") != std::string::npos)
-          expected_test_main +=
+        if (obj.find("benchmark_") != std::string::npos)
+          expected_benchmark_main +=
               "#include \"" +
               obj.substr(obj.find_last_of('/') + 1, obj.size()) + "\"\n";
 
-  expected_test_main +=
-      "\nint main(int argc, char** args) {\n"
-      "  ::testing::InitGoogleTest(&argc, args);\n"
-      "  return RUN_ALL_TESTS();\n"
-      "}";
+  expected_benchmark_main += "\nBENCHMARK_MAIN()";
 
-  CommonWriter::UpdateIfDifferent(dir_name + "/test_main.cc",
-                                  expected_test_main);
+  CommonWriter::UpdateIfDifferent(dir_name + "/benchmark_main.cc",
+                                  expected_benchmark_main);
 
   std::string expected = CommonWriter::cmake_header_ + "\n";
   std::map<std::string, std::set<std::string>> all_finds;
-  all_finds["GTest"] = {};
 
   for (auto& dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("test_") != std::string::npos) continue;
     for (auto& lib : dir.second.libraries) {
       auto& lib_info = libraries[lib];
 
@@ -105,7 +98,7 @@ void TesttargetWriter::WriteTestTarget(
 
   expected +=
       "\nset(cpp_files\n"
-      "  test_main.cc\n"
+      "  benchmark_main.cc\n"
       "  precomp.h\n"
       "  precomp.cc\n"
       ")\n\n"
@@ -115,7 +108,7 @@ void TesttargetWriter::WriteTestTarget(
       proj_name + " ${cpp_files})\n\n";
 
   for (auto& dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("test_") != std::string::npos) continue;
     for (auto& d : dir.second.directories)
       if (!d.empty())
         include_dirs.insert("." + dir.first + d.substr(1, d.size()));
@@ -124,7 +117,7 @@ void TesttargetWriter::WriteTestTarget(
     for (auto& lib : dir.second.libraries)
       for (auto& inc : libraries[lib].includes) include_dirs.insert(inc);
   }
-  include_dirs.insert("${GTEST_INCLUDE_DIRS}");
+  include_dirs.insert("D:/API/GoogleBenchmark/include");
 
   expected += "include_directories(" + proj_name + "\n";
   for (auto& include : include_dirs) expected += "  " + include + "\n";
@@ -132,8 +125,8 @@ void TesttargetWriter::WriteTestTarget(
 
   std::set<std::string> link_libraries;
   for (auto& dir : targets) {
+    if (dir.first.find("test_") != std::string::npos) continue;
     if (dir.first.find("benchmark_") != std::string::npos) continue;
-	if (dir.first.find("test_") != std::string::npos) continue;
 
     std::string dir_n =
         dir.first.substr(dir.first.find_last_of('/') + 1, dir.first.size());
@@ -177,14 +170,16 @@ void TesttargetWriter::WriteTestTarget(
       link_libraries.insert(obj_file_str);
     }
   }
-  link_libraries.insert("${GTEST_LIBRARIES}");
+  link_libraries.insert("Shlwapi.lib");
+  link_libraries.insert("optimized D:/API/GoogleBenchmark/lib/benchmark.lib");
+  link_libraries.insert("debug D:/API/GoogleBenchmark/lib/benchmarkd.lib");
 
   expected += "target_link_libraries(" + proj_name + "\n";
   for (auto& lib : link_libraries) expected += "  " + lib + "\n";
   expected += ")\n\n";
 
   for (auto& dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("test_") != std::string::npos) continue;
     std::set<std::string> libs;
     for (auto& dep : dir.second.dependencies)
       for (auto& lib : targets["./" + dep].libraries)
@@ -230,7 +225,7 @@ void TesttargetWriter::WriteTestTarget(
 
   expected += "add_dependencies(" + proj_name;
   for (auto& dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("test_") != std::string::npos) continue;
     std::string dir_n =
         dir.first.substr(dir.first.find_last_of('/') + 1, dir.first.size());
     dir_n = dir_n.substr(dir_n.find_first_of('_') + 1, dir_n.size());
@@ -241,33 +236,33 @@ void TesttargetWriter::WriteTestTarget(
   CommonWriter::UpdateIfDifferent(dir_name + "/CMakeLists.txt", expected);
 }
 
-bool TesttargetWriter::MainUpdateNeeded(
+bool BenchmarktargetWriter::MainUpdateNeeded(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory>& targets) {
-  if (!std::experimental::filesystem::exists(dir_name + "/test_main.cc"))
+  if (!std::experimental::filesystem::exists(dir_name + "/benchmark_main.cc"))
     return true;
 
-  std::ifstream test_main(dir_name + "/test_main.cc");
+  std::ifstream bench_main(dir_name + "/benchmark_main.cc");
 
-  std::set<std::string> test_files, check_set;
+  std::set<std::string> bench_files, check_set;
   for (auto& dir : targets)
     for (auto& obj_dir : dir.second.files["h"].fmap)
       for (auto& obj : obj_dir.second)
-        if (obj.find("test_") != std::string::npos)
-          test_files.insert(obj.substr(obj.find_last_of('/') + 1, obj.size()));
+        if (obj.find("benchmark_") != std::string::npos)
+          bench_files.insert(obj.substr(obj.find_last_of('/') + 1, obj.size()));
 
   std::string line;
-  while (!test_main.eof()) {
-    std::getline(test_main, line);
+  while (!bench_main.eof()) {
+    std::getline(bench_main, line);
 
     if (line.find("#include") != std::string::npos) {
-      auto& it = test_files.find(
+      auto& it = bench_files.find(
           line.substr(line.find_first_of('\"') + 1,
                       line.find_last_of('\"') - line.find_first_of('\"') - 1));
-      if (it != test_files.end()) check_set.insert(*it);
+      if (it != bench_files.end()) check_set.insert(*it);
     }
   }
 
-  test_main.close();
-  return check_set.size() != test_files.size();
+  bench_main.close();
+  return check_set.size() != bench_files.size();
 }

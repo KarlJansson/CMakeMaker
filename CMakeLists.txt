@@ -25,7 +25,7 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 if (WIN32)
   add_definitions(-DWindowsBuild)
-  set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -MP")
+  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -MP")
 else(WIN32)
   add_definitions(-DUnixBuild)
   set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC")
@@ -39,6 +39,7 @@ add_custom_target(
 
 add_subdirectory(./cmd_cmakemaker)
 add_subdirectory(./test_testdriver)
+add_subdirectory(./benchmark_benchdriver)
 if (MSVC)
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT cmakemaker)
 endif(MSVC)

@@ -8,13 +8,16 @@ set(cpp_files
   ./source/main.cc
   ./source/utility/repo_searcher.cc
   ./source/utility/settings_parser.cc
+  ./source/writers/benchmarktarget_writer.cc
   ./source/writers/cmake_writer.cc
   ./source/writers/common_writer.cc
   ./source/writers/subdir_writer.cc
   ./source/writers/testtarget_writer.cc
+  ./benchmark/benchmark_testbench.h
   ./precomp/precomp.h
   ./source/utility/repo_searcher.h
   ./source/utility/settings_parser.h
+  ./source/writers/benchmarktarget_writer.h
   ./source/writers/cmake_writer.h
   ./source/writers/common_writer.h
   ./source/writers/subdir_writer.h
@@ -22,6 +25,10 @@ set(cpp_files
   ./test/test_common_writer.h
   ./test/test_subdir_writer.h
   ./test/test_testtarget_writer.h
+)
+
+source_group(benchmark FILES
+  ./benchmark/benchmark_testbench.h
 )
 
 source_group(precomp FILES
@@ -41,10 +48,12 @@ source_group(source\\utility FILES
 )
 
 source_group(source\\writers FILES
+  ./source/writers/benchmarktarget_writer.cc
   ./source/writers/cmake_writer.cc
   ./source/writers/common_writer.cc
   ./source/writers/subdir_writer.cc
   ./source/writers/testtarget_writer.cc
+  ./source/writers/benchmarktarget_writer.h
   ./source/writers/cmake_writer.h
   ./source/writers/common_writer.h
   ./source/writers/subdir_writer.h
@@ -62,6 +71,7 @@ add_executable(cmakemaker ${cpp_files})
 
 include_directories(cmakemaker
   ../source_shared
+  ./benchmark
   ./precomp
   ./source
   ./source/utility
