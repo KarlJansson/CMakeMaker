@@ -77,7 +77,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
-      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -fPIC\")\n"
+      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -fPIC -std=c++14\")\n"
       "endif(WIN32)\n\n"
 
       "add_custom_target(\n"
