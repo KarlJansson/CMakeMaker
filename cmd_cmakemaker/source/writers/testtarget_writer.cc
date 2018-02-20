@@ -261,7 +261,7 @@ bool TesttargetWriter::MainUpdateNeeded(
     std::getline(test_main, line);
 
     if (line.find("#include") != std::string::npos) {
-      auto& it = test_files.find(
+      auto it = test_files.find(
           line.substr(line.find_first_of('\"') + 1,
                       line.find_last_of('\"') - line.find_first_of('\"') - 1));
       if (it != test_files.end()) check_set.insert(*it);

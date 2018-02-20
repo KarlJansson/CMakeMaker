@@ -256,7 +256,7 @@ bool BenchmarktargetWriter::MainUpdateNeeded(
     std::getline(bench_main, line);
 
     if (line.find("#include") != std::string::npos) {
-      auto& it = bench_files.find(
+      auto it = bench_files.find(
           line.substr(line.find_first_of('\"') + 1,
                       line.find_last_of('\"') - line.find_first_of('\"') - 1));
       if (it != bench_files.end()) check_set.insert(*it);
