@@ -28,7 +28,7 @@ void CommonWriter::UpdateIfDifferent(std::string file_path,
                     check_str.end());
 
     if (expected.size() == check_str.size())
-      if (expected.compare(check_str) != 0)
+      if (expected.compare(check_str) == 0)
         update = false;
   }
 
