@@ -28,7 +28,7 @@ if (WIN32)
   set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -MP")
 else(WIN32)
   add_definitions(-DUnixBuild)
-  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC")
+  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++14")
 endif(WIN32)
 
 add_custom_target(

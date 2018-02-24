@@ -110,12 +110,13 @@ void RepoSearcher::ProcessFile(
             line.substr(line.find_first_of('<'),
                         line.find_last_of('>') - line.find_first_of('<') + 1);
         include_encap = "<>";
-      } else {
+      } else if (line.find('"') != std::string::npos) {
         stripped_name =
             line.substr(line.find_first_of('"'),
                         line.find_last_of('"') - line.find_first_of('"') + 1);
         include_encap = "\"\"";
-      }
+      } else
+        continue;
 
       if (!stripped_name.empty() && stripped_name.size() > 1 &&
           stripped_name[0] == include_encap[0] &&
