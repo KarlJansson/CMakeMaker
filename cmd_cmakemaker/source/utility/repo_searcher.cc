@@ -191,7 +191,13 @@ void RepoSearcher::CollectEntry(
   std::stringstream path_stream;
   path_stream << entry;
   std::string path = path_stream.str();
+#ifdef WindowsBuild
   std::replace(path.begin(), path.end(), '\\', '/');
+#elif UnixBuild
+  std::replace(path.begin(), path.end(), '\"', ' ');
+  while (!path.empty() && path[0] == ' ') path = path.substr(1, path.size());
+  while (!path.empty() && path.back() == ' ') path.pop_back();
+#endif
 
   if (dir_name.compare("./") != 0) {
     std::string::size_type i = path.find(

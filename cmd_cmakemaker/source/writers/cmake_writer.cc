@@ -82,7 +82,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
       "add_custom_target(\n"
       "  ALL_PRE_BUILD\n"
-      "  COMMAND cmakemaker.exe\n"
+      "  COMMAND cmakemaker\n"
       "  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
       ")\n\n";
 
