@@ -28,8 +28,7 @@ void CommonWriter::UpdateIfDifferent(std::string file_path,
                     check_str.end());
 
     if (expected.size() == check_str.size())
-      if (expected.compare(check_str) == 0)
-        update = false;
+      if (expected.compare(check_str) == 0) update = false;
   }
 
   if (update) {
@@ -41,8 +40,9 @@ void CommonWriter::UpdateIfDifferent(std::string file_path,
 
 void CommonWriter::AddMakeDirCommand(std::string dir_path, std::string base_dir,
                                      bool config_inc, std::string &expected) {
-  expected += "  COMMAND ${CMAKE_COMMAND} ARGS -E make_directory\n"
-              "    \"";
+  expected +=
+      "  COMMAND ${CMAKE_COMMAND} ARGS -E make_directory\n"
+      "    \"";
   for (auto &conf : configs_)
     expected += "$<$<CONFIG:" + conf + ">:" + base_dir +
                 (config_inc ? conf : "") + dir_path.substr(1, dir_path.size()) +
@@ -55,8 +55,9 @@ void CommonWriter::AddCopyCommand(std::string file_path,
                                   std::string source_base,
                                   std::string dest_base, bool config_inc,
                                   std::string &expected) {
-  expected += "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n"
-              "    \"";
+  expected +=
+      "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n"
+      "    \"";
   for (auto &conf : configs_)
     expected += "$<$<CONFIG:" + conf + ">:" + source_base + file_path +
                 (conf.compare("Debug") == 0 ? debug_suffix : "") + ext + ">";
@@ -71,6 +72,7 @@ void CommonWriter::AddCopyCommand(std::string file_path,
 void CommonWriter::WriteSourceGroups(RepoSearcher::directory &dir,
                                      std::string &expected) {
   for (auto &d : dir.directories) {
+    if (d.substr(0, 2).compare("./") != 0) continue;
     auto group_name = d.substr(d.find_first_of('/') + 1, d.size());
 
     if (group_name.find('/') != std::string::npos) {
@@ -92,8 +94,7 @@ void CommonWriter::WriteSourceGroups(RepoSearcher::directory &dir,
     for (auto &ext : CommonWriter::extensions_)
       for (auto &file : dir.files[ext].fmap)
         if (file.first.compare(d) == 0)
-          for (auto &pair : file.second)
-            expected += "  " + pair + "\n";
+          for (auto &pair : file.second) expected += "  " + pair + "\n";
     expected += ")\n\n";
   }
 }

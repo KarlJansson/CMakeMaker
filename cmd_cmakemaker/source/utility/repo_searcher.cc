@@ -34,9 +34,55 @@ void RepoSearcher::FindDependencies(
 
       for (auto& pair : map.second.fmap)
         for (auto& file : pair.second)
-          ProcessFile(file, target.second, libraries, include_files.back(),
-                      all_headers, add_header);
+          ProcessFile(target.second.dir_name + "/" + file, target.second,
+                      libraries, include_files.back(), all_headers, add_header);
     }
+  }
+
+  size_t target_id = 0;
+  std::set<std::string> checked;
+  std::vector<std::string> reprocess;
+  for (auto& target : targets) {
+    reprocess = {""};
+    checked.clear();
+    while (!reprocess.empty()) {
+      reprocess.clear();
+      for (auto& file : target.second.include_files)
+        if (all_headers.find(file.first) != all_headers.end() &&
+            checked.find(file.first) == checked.end()) {
+          reprocess.push_back(file.first.substr(1, file.first.size() - 2));
+          checked.insert(file.first);
+        }
+
+      for (auto& file : reprocess) target.second.include_files.erase(file);
+      for (auto& file : reprocess) {
+        std::string dir = "";
+        auto find_dir = [&](std::string ext) {
+          for (auto& t : targets) {
+            if (t.first.compare(target.first) == 0) continue;
+            for (auto& m : t.second.files[ext].fmap) {
+              for (auto& f : m.second) {
+                if (f.find("/" + file) != std::string::npos) {
+                  dir = t.second.dir_name + "/" + m.first + "/";
+                  return;
+                }
+              }
+            }
+          }
+        };
+        find_dir("h");
+        if (dir.empty()) find_dir("hpp");
+        if (!dir.empty()) {
+          if (std::find(target.second.directories.begin(),
+                        target.second.directories.end(),
+                        "." + dir) == target.second.directories.end())
+            target.second.directories.push_back("." + dir);
+          ProcessFile(dir + file, target.second, libraries,
+                      include_files[target_id], all_headers, true);
+        }
+      }
+    }
+    ++target_id;
   }
 
   for (auto& target : targets)
@@ -85,15 +131,14 @@ void RepoSearcher::FindDependencies(
 }
 
 void RepoSearcher::ProcessFile(
-    std::string& file, RepoSearcher::directory& target,
+    std::string file, RepoSearcher::directory& target,
     std::map<std::string, RepoSearcher::library>& libraries,
     std::set<std::string>& include_files, std::set<std::string>& all_headers,
     bool add_header) {
   std::string q_obj_string = "Q_";
   q_obj_string += "OBJECT";
   std::string include_encap;
-  std::ifstream open(target.dir_name +
-                     file.substr(file.find_first_of('.'), file.size()));
+  std::ifstream open(file);
 
   while (!open.fail() && !open.eof()) {
     std::string line;

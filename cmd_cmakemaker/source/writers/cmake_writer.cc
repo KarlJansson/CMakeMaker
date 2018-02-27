@@ -8,7 +8,7 @@
 
 CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
   SettingsParser parse;
-  parse.ParseSettings("./cmakemaker", libraries_);
+  parse.ParseSettings("./.cmakemaker", libraries_);
 }
 
 void CmakeWriter::WriteCmakeFiles() {

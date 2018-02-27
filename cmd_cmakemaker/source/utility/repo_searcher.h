@@ -20,7 +20,7 @@ class RepoSearcher {
     std::vector<std::string> includes;
     std::vector<std::string> libs;
     std::vector<std::string> dlls;
-	std::vector<std::string> debug_dlls;
+    std::vector<std::string> debug_dlls;
     std::string debug_suffix;
   };
 
@@ -45,7 +45,7 @@ class RepoSearcher {
       std::map<std::string, RepoSearcher::library>& libraries);
 
  private:
-  void ProcessFile(std::string& file, RepoSearcher::directory& target,
+  void ProcessFile(std::string file, RepoSearcher::directory& target,
                    std::map<std::string, RepoSearcher::library>& libraries,
                    std::set<std::string>& include_files,
                    std::set<std::string>& all_headers, bool add_header);
