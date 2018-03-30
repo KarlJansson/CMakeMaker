@@ -44,7 +44,7 @@ void CmakeWriter::WriteCmakeFiles() {
 void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
   std::string expected =
       CommonWriter::cmake_header_ +
-      "project(cmakemaker_solution C CXX)\n\n"
+      "project(cmakemaker_solution CXX)\n\n"
 
       "macro(add_msvc_precompiled_header PrecompiledHeader \n"
       "PrecompiledSource SourcesVar)\n"
@@ -78,6 +78,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
       "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -std=c++14\")\n"
+      "  set(CMAKE_CXX_FLAGS_DEBUG  \"${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\")\n"
       "endif(WIN32)\n\n"
 
       "add_custom_target(\n"

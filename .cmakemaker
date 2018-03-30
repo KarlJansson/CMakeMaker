@@ -1,0 +1,4 @@
+{
+	name : "experimental/filesystem"
+	lib_dir : "libstdc++fs.a" 
+}
