@@ -2,4 +2,4 @@
 
 #include "benchmark_testbench.h"
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

@@ -16,8 +16,7 @@ void TesttargetWriter::WriteTestTarget(
   std::set<std::string> added;
   std::map<int, std::string> all_includes;
   for (auto &target : targets) {
-    if (target.first.find("benchmark_") != std::string::npos)
-      continue;
+    if (target.first.find("benchmark_") != std::string::npos) continue;
     for (auto &file : target.second.include_files) {
       if (added.find(file.first) == added.end()) {
         all_includes[file.second] = file.first;
@@ -37,6 +36,7 @@ void TesttargetWriter::WriteTestTarget(
         path_stream << p;
         std::string path = path_stream.str();
         std::replace(path.begin(), path.end(), '\\', '/');
+        while (path.back() == '\"') path.pop_back();
 
         precomp_includes +=
             "#include \"" + path.substr(path.find_last_of('/') + 1) + "\"\n";
@@ -46,14 +46,17 @@ void TesttargetWriter::WriteTestTarget(
 
   precomp_includes += "\n";
 
-  for (auto &include : all_includes)
+  for (auto &include : all_includes) {
+    while (include.second.back() == '\"') include.second.pop_back();
     precomp_includes += "#include " + include.second + "\n";
+  }
 
   precomp_includes += "\n";
 
-  std::string expected_precomp_h = "#include <gtest/gt"
-                                   "est.h>\n\n" +
-                                   precomp_includes;
+  std::string expected_precomp_h =
+      "#include <gtest/gt"
+      "est.h>\n\n" +
+      precomp_includes;
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.h", expected_precomp_h);
 
   std::string expected_precomp_cc = "#include \"precomp.h\"\n\n";
@@ -64,15 +67,18 @@ void TesttargetWriter::WriteTestTarget(
   for (auto &dir : targets)
     for (auto &obj_dir : dir.second.files["h"].fmap)
       for (auto &obj : obj_dir.second)
-        if (obj.find("test_") != std::string::npos)
+        if (obj.find("test_") != std::string::npos) {
+          while (obj.back() == '\"') obj.pop_back();
           expected_test_main +=
               "#include \"" +
               obj.substr(obj.find_last_of('/') + 1, obj.size()) + "\"\n";
+        }
 
-  expected_test_main += "\nint main(int argc, char** args) {\n"
-                        "  ::testing::InitGoogleTest(&argc, args);\n"
-                        "  return RUN_ALL_TESTS();\n"
-                        "}";
+  expected_test_main +=
+      "\nint main(int argc, char** args) {\n"
+      "  ::testing::InitGoogleTest(&argc, args);\n"
+      "  return RUN_ALL_TESTS();\n"
+      "}";
 
   CommonWriter::UpdateIfDifferent(dir_name + "/test_main.cc",
                                   expected_test_main);
@@ -82,15 +88,13 @@ void TesttargetWriter::WriteTestTarget(
   all_finds["GTest"] = {};
 
   for (auto &dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos)
-      continue;
+    if (dir.first.find("benchmark_") != std::string::npos) continue;
     for (auto &lib : dir.second.libraries) {
       auto &lib_info = libraries[lib];
 
       if (!lib_info.find_command.empty()) {
         auto &ref = all_finds[lib_info.find_command];
-        for (auto &comp : lib_info.components)
-          ref.insert(comp);
+        for (auto &comp : lib_info.components) ref.insert(comp);
       }
     }
   }
@@ -99,8 +103,7 @@ void TesttargetWriter::WriteTestTarget(
     expected += "find_package(" + find.first;
     if (!find.second.empty()) {
       expected += " COMPONENTS\n";
-      for (auto &mod : find.second)
-        expected += "  " + mod + "\n";
+      for (auto &mod : find.second) expected += "  " + mod + "\n";
     }
     expected += ")\n";
   }
@@ -117,43 +120,35 @@ void TesttargetWriter::WriteTestTarget(
       proj_name + " ${cpp_files})\n\n";
 
   for (auto &dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos)
-      continue;
+    if (dir.first.find("benchmark_") != std::string::npos) continue;
     for (auto &d : dir.second.directories)
       if (!d.empty())
         include_dirs.insert("." + dir.first + d.substr(1, d.size()));
     for (auto &d : dir.second.include_dirs)
-      if (!d.empty())
-        include_dirs.insert(d);
+      if (!d.empty()) include_dirs.insert(d);
     for (auto &lib : dir.second.libraries)
-      for (auto &inc : libraries[lib].includes)
-        include_dirs.insert(inc);
+      for (auto &inc : libraries[lib].includes) include_dirs.insert(inc);
   }
   include_dirs.insert("${GTEST_INCLUDE_DIRS}");
 
   expected += "include_directories(" + proj_name + "\n";
-  for (auto &include : include_dirs)
-    expected += "  " + include + "\n";
+  for (auto &include : include_dirs) expected += "  " + include + "\n";
   expected += ")\n\n";
 
   std::set<std::string> link_libraries;
   for (auto &dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos)
-      continue;
-    if (dir.first.find("test_") != std::string::npos)
-      continue;
+    if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("test_") != std::string::npos) continue;
 
     std::string dir_n =
         dir.first.substr(dir.first.find_last_of('/') + 1, dir.first.size());
 
     for (auto &lib : dir.second.libraries)
-      for (auto &l : libraries[lib].libs)
-        link_libraries.insert(l);
+      for (auto &l : libraries[lib].libs) link_libraries.insert(l);
     for (auto &ext : ext) {
       for (auto &obj_dir : dir.second.files[ext].fmap) {
         for (auto &obj : obj_dir.second) {
-          if (obj.find("main.") != std::string::npos)
-            continue;
+          if (obj.find("main.") != std::string::npos) continue;
 #ifdef WindowsBuild
           std::string obj_file_str =
               "${CMAKE_CURRENT_BINARY_DIR}/../" + dir_n + "/" +
@@ -180,8 +175,7 @@ void TesttargetWriter::WriteTestTarget(
     }
 
     for (auto &obj : dir.second.moc_files) {
-      if (obj.find("main.") != std::string::npos)
-        continue;
+      if (obj.find("main.") != std::string::npos) continue;
 #ifdef WindowsBuild
       std::string obj_file_str =
           "${CMAKE_CURRENT_BINARY_DIR}/../" + dir_n + "/" +
@@ -206,22 +200,18 @@ void TesttargetWriter::WriteTestTarget(
   link_libraries.insert("${GTEST_LIBRARIES}");
 
   expected += "target_link_libraries(" + proj_name + "\n";
-  for (auto &lib : link_libraries)
-    expected += "  " + lib + "\n";
+  for (auto &lib : link_libraries) expected += "  " + lib + "\n";
   expected += ")\n\n";
 
   for (auto &dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos)
-      continue;
+    if (dir.first.find("benchmark_") != std::string::npos) continue;
     std::set<std::string> libs;
     for (auto &dep : dir.second.dependencies)
       for (auto &lib : targets["./" + dep].libraries)
-        if (!libraries[lib].dlls.empty())
-          libs.insert(lib);
+        if (!libraries[lib].dlls.empty()) libs.insert(lib);
 
     for (auto &lib : dir.second.libraries)
-      if (!libraries[lib].dlls.empty())
-        libs.insert(lib);
+      if (!libraries[lib].dlls.empty()) libs.insert(lib);
 
     if (!libs.empty())
       expected += "add_custom_command(TARGET " + proj_name + " POST_BUILD\n";
@@ -255,14 +245,12 @@ void TesttargetWriter::WriteTestTarget(
         expected += "\"\n";
       }
     }
-    if (!libs.empty())
-      expected += ")\n\n";
+    if (!libs.empty()) expected += ")\n\n";
   }
 
   expected += "add_dependencies(" + proj_name;
   for (auto &dir : targets) {
-    if (dir.first.find("benchmark_") != std::string::npos)
-      continue;
+    if (dir.first.find("benchmark_") != std::string::npos) continue;
     std::string dir_n =
         dir.first.substr(dir.first.find_last_of('/') + 1, dir.first.size());
     dir_n = dir_n.substr(dir_n.find_first_of('_') + 1, dir_n.size());
@@ -296,8 +284,7 @@ bool TesttargetWriter::MainUpdateNeeded(
       auto it = test_files.find(
           line.substr(line.find_first_of('\"') + 1,
                       line.find_last_of('\"') - line.find_first_of('\"') - 1));
-      if (it != test_files.end())
-        check_set.insert(*it);
+      if (it != test_files.end()) check_set.insert(*it);
     }
   }
 

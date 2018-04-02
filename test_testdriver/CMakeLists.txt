@@ -24,15 +24,16 @@ include_directories(testdriver
 )
 
 target_link_libraries(testdriver
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/benchmarktarget_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/cmake_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/common_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/precomp.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/repo_searcher.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/settings_parser.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/subdir_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/testtarget_writer.obj
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./precomp/precomp.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/utility/repo_searcher.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/utility/settings_parser.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/benchmarktarget_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/cmake_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/common_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/subdir_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/testtarget_writer.cc.o
   ${GTEST_LIBRARIES}
+  libstdc++fs.a
 )
 
 add_dependencies(testdriver cmakemaker ALL_PRE_BUILD)

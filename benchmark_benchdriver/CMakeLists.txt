@@ -19,21 +19,20 @@ include_directories(benchdriver
   ../cmd_cmakemaker/source/writers
   ../cmd_cmakemaker/test
   ../source_shared
-  D:/API/GoogleBenchmark/include
 )
 
 target_link_libraries(benchdriver
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/benchmarktarget_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/cmake_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/common_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/precomp.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/repo_searcher.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/settings_parser.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/subdir_writer.obj
-  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/cmakemaker.dir/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>$<$<CONFIG:MinSizeRel>:MinSizeRel>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>/testtarget_writer.obj
-  Shlwapi.lib
-  debug D:/API/GoogleBenchmark/lib/benchmarkd.lib
-  optimized D:/API/GoogleBenchmark/lib/benchmark.lib
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./precomp/precomp.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/utility/repo_searcher.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/utility/settings_parser.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/benchmarktarget_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/cmake_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/common_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/subdir_writer.cc.o
+  ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/testtarget_writer.cc.o
+  libbenchmark.a
+  libpthread.so
+  libstdc++fs.a
 )
 
 add_dependencies(benchdriver cmakemaker ALL_PRE_BUILD)
