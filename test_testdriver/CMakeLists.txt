@@ -33,6 +33,7 @@ target_link_libraries(testdriver
   ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/subdir_writer.cc.o
   ${CMAKE_CURRENT_BINARY_DIR}/../cmd_cmakemaker/CMakeFiles/cmakemaker.dir/./source/writers/testtarget_writer.cc.o
   ${GTEST_LIBRARIES}
+  libpthread.so
   libstdc++fs.a
 )
 

@@ -198,6 +198,9 @@ void TesttargetWriter::WriteTestTarget(
     }
   }
   link_libraries.insert("${GTEST_LIBRARIES}");
+#ifdef UnixBuild
+  link_libraries.insert("libpthread.so");
+#endif
 
   expected += "target_link_libraries(" + proj_name + "\n";
   for (auto &lib : link_libraries) expected += "  " + lib + "\n";
