@@ -81,9 +81,10 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "  set(CMAKE_CXX_FLAGS_DEBUG  \"${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\")\n"
       "endif(WIN32)\n\n"
 
+      "find_program(CMAKEMAKER_CMD cmakemaker)\n"
       "add_custom_target(\n"
       "  ALL_PRE_BUILD\n"
-      "  COMMAND cmakemaker\n"
+      "  COMMAND ${CMAKEMAKER_CMD}\n"
       "  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
       ")\n\n";
 
