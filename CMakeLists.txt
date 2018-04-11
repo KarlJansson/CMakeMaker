@@ -32,12 +32,19 @@ else(WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 endif(WIN32)
 
-find_program(CMAKEMAKER_EXIST cmakemaker)
-add_custom_target(
-  ALL_PRE_BUILD
-  COMMAND ${CMAKEMAKER_EXIST}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+find_program(CMAKEMAKER_CMD cmakemaker)
+if(NOT CMAKEMAKER_CMD)
+  add_custom_target(
+    ALL_PRE_BUILD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+else()
+  add_custom_target(
+    ALL_PRE_BUILD
+    COMMAND ${CMAKEMAKER_CMD}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+endif()
 
 add_subdirectory(./cmd_cmakemaker)
 add_subdirectory(./test_testdriver)

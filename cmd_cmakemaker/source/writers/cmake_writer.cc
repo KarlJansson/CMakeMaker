@@ -82,11 +82,18 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "endif(WIN32)\n\n"
 
       "find_program(CMAKEMAKER_CMD cmakemaker)\n"
-      "add_custom_target(\n"
-      "  ALL_PRE_BUILD\n"
-      "  COMMAND ${CMAKEMAKER_CMD}\n"
-      "  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
-      ")\n\n";
+      "if(NOT CMAKEMAKER_CMD)\n"
+      "  add_custom_target(\n"
+      "    ALL_PRE_BUILD\n"
+      "    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
+      "  )\n"
+      "else()\n"
+      "  add_custom_target(\n"
+      "    ALL_PRE_BUILD\n"
+      "    COMMAND ${CMAKEMAKER_CMD}\n"
+      "    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}\n"
+      "  )\n"
+      "endif()\n\n";
 
   std::vector<std::string> copy_types = {"qml"};
   for (auto target : targets_) {
