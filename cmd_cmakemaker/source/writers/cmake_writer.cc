@@ -8,7 +8,18 @@
 
 CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
   SettingsParser parse;
-  parse.ParseSettings("./.cmakemaker", libraries_);
+  std::string cmake_config_path;
+#ifdef WindowsBuild
+  if (std::experimental::filesystem::exists("./.cmakemaker_win"))
+    cmake_config_path = "./.cmakemaker_win";
+#else
+  if (std::experimental::filesystem::exists("./.cmakemaker_unix"))
+    cmake_config_path = "./.cmakemaker_unix";
+#endif
+  if (cmake_config_path.empty())
+    parse.ParseSettings("./.cmakemaker", libraries_);
+  else
+    parse.ParseSettings(cmake_config_path, libraries_);
 }
 
 void CmakeWriter::WriteCmakeFiles() {
