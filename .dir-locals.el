@@ -1,1 +1,1 @@
-((c++-mode (helm-make-build-dir . "../BuildFiles/cmakemaker")))
+((c++-mode (helm-make-build-dir . "../build_release")))
