@@ -3,7 +3,8 @@
 #include "settings_parser.h"
 
 void SettingsParser::ParseSettings(
-    std::string path, std::map<std::string, RepoSearcher::library>& libraries) {
+    std::string path, std::map<std::string, RepoSearcher::library>& libraries,
+    std::map<std::string, std::string>& other_settings) {
   std::ifstream open(path);
   if (!open.fail()) {
     RepoSearcher::library tmp;
@@ -36,6 +37,8 @@ void SettingsParser::ParseSettings(
           str_ptr = &tmp.debug_dlls.back();
         } else if (left.find("debug_suffix") != std::string::npos)
           str_ptr = &tmp.debug_suffix;
+        else
+          other_settings[left] = right;
 
         if (str_ptr)
           *str_ptr = right.substr(

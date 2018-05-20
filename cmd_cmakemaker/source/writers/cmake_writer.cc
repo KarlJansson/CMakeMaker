@@ -17,9 +17,9 @@ CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
     cmake_config_path = "./.cmakemaker_unix";
 #endif
   if (cmake_config_path.empty())
-    parse.ParseSettings("./.cmakemaker", libraries_);
+    parse.ParseSettings("./.cmakemaker", libraries_, settings_);
   else
-    parse.ParseSettings(cmake_config_path, libraries_);
+    parse.ParseSettings(cmake_config_path, libraries_, settings_);
 }
 
 void CmakeWriter::WriteCmakeFiles() {
@@ -53,6 +53,10 @@ void CmakeWriter::WriteCmakeFiles() {
 }
 
 void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
+  std::string cpp_version = "c++14";
+  auto it = settings_.find("cpp_version");
+  if (it != settings_.end()) cpp_version = it->second;
+
   std::string expected =
       CommonWriter::cmake_header_ +
       "project(cmakemaker_solution CXX)\n\n"
@@ -88,7 +92,9 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
-      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -std=c++14\")\n"
+      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -std=" +
+      cpp_version +
+      "\")\n"
       "  set(CMAKE_CXX_FLAGS_DEBUG  \"${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\")\n"
       "endif(WIN32)\n\n"
 

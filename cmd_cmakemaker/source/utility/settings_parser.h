@@ -6,5 +6,6 @@
 class SettingsParser {
  public:
   void ParseSettings(std::string path,
-                     std::map<std::string, RepoSearcher::library>& libraries);
+                     std::map<std::string, RepoSearcher::library>& libraries,
+                     std::map<std::string, std::string>& other_settings);
 };
