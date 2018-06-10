@@ -16,6 +16,12 @@ void SettingsParser::ParseSettings(
         std::string left = line.substr(0, line.find_first_of(':'));
         std::string right =
             line.substr(line.find_first_of(':') + 1, line.size());
+        while (!left.empty() && left.back() == ' ') left.pop_back();
+        while (!right.empty() && right.back() == ' ') right.pop_back();
+        while (!left.empty() && left[0] == ' ')
+          left = left.substr(1, left.size());
+        while (!right.empty() && right[0] == ' ')
+          right = right.substr(1, right.size());
 
         std::string* str_ptr = nullptr;
         if (left.find("name") != std::string::npos)
