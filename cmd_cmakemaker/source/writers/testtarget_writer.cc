@@ -86,6 +86,7 @@ void TesttargetWriter::WriteTestTarget(
   std::string expected = CommonWriter::cmake_header_ + "\n";
   std::map<std::string, std::set<std::string>> all_finds;
   all_finds["GTest"] = {};
+  all_finds["GMock"] = {};
 
   for (auto &dir : targets) {
     if (dir.first.find("benchmark_") != std::string::npos) continue;
@@ -130,6 +131,7 @@ void TesttargetWriter::WriteTestTarget(
       for (auto &inc : libraries[lib].includes) include_dirs.insert(inc);
   }
   include_dirs.insert("${GTEST_INCLUDE_DIRS}");
+  include_dirs.insert("${GMOCK_INCLUDE_DIRS}");
 
   expected += "include_directories(" + proj_name + "\n";
   for (auto &include : include_dirs) expected += "  " + include + "\n";
@@ -198,6 +200,7 @@ void TesttargetWriter::WriteTestTarget(
     }
   }
   link_libraries.insert("${GTEST_LIBRARIES}");
+  link_libraries.insert("${GMOCK_LIBRARIES}");
 #ifdef UnixBuild
   link_libraries.insert("libpthread.so");
 #endif
