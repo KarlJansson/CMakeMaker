@@ -61,6 +61,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       CommonWriter::cmake_header_ +
       "project(cmakemaker_solution CXX)\n\n"
 
+      "set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n"
       "macro(add_msvc_precompiled_header PrecompiledHeader \n"
       "PrecompiledSource SourcesVar)\n"
       "  if(MSVC)\n"
@@ -194,6 +195,12 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
         ")\n"
         "endif(MSVC)\n";
   }
+
+  expected += "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n"
+              "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "
+              "\"${CMAKE_BINARY_DIR}/compile_commands.json\" "
+              "\"${CMAKE_SOURCE_DIR}/compile_commands.json\""
+              "\n)";
 
   CommonWriter::UpdateIfDifferent("./CMakeLists.txt", expected);
 }

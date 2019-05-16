@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(cmakemaker_solution CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 macro(add_msvc_precompiled_header PrecompiledHeader 
 PrecompiledSource SourcesVar)
   if(MSVC)
@@ -52,3 +53,6 @@ add_subdirectory(./benchmark_benchdriver)
 if (MSVC)
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT cmakemaker)
 endif(MSVC)
+add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "${CMAKE_BINARY_DIR}/compile_commands.json" "${CMAKE_SOURCE_DIR}/compile_commands.json"
+)
