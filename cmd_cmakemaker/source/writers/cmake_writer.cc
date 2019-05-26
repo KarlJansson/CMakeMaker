@@ -59,6 +59,12 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
   std::string expected =
       CommonWriter::cmake_header_ +
+      "find_program(CCACHE_PROGRAM ccache)\n"
+      "if(CCACHE_PROGRAM)\n"
+      "  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "
+      "\"${CCACHE_PROGRAM}\")\n"
+      "endif()\n\n"
+
       "project(cmakemaker_solution CXX)\n\n"
 
       "set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n"
@@ -196,11 +202,12 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
         "endif(MSVC)\n";
   }
 
-  expected += "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n"
-              "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "
-              "\"${CMAKE_BINARY_DIR}/compile_commands.json\" "
-              "\"${CMAKE_SOURCE_DIR}/compile_commands.json\""
-              "\n)";
+  expected +=
+      "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n"
+      "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "
+      "\"${CMAKE_BINARY_DIR}/compile_commands.json\" "
+      "\"${CMAKE_SOURCE_DIR}/compile_commands.json\""
+      "\n)";
 
   CommonWriter::UpdateIfDifferent("./CMakeLists.txt", expected);
 }
