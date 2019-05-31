@@ -202,11 +202,34 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
         "endif(MSVC)\n";
   }
 
+  // Copy the compilation database to the root source dir
+  // Make a .clang_complete compilation database from the compile_commands file
   expected +=
       "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n"
       "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "
       "\"${CMAKE_BINARY_DIR}/compile_commands.json\" "
-      "\"${CMAKE_SOURCE_DIR}/compile_commands.json\""
+      "\"${CMAKE_SOURCE_DIR}/compile_commands.json\"\n"
+      "  COMMAND cat ${CMAKE_SOURCE_DIR}/compile_commands.json > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete_tmp VERBATIM\n"
+      "  COMMAND sed \"s/-/\\\\n-/g\" ${CMAKE_SOURCE_DIR}/.clang_complete_tmp "
+      "> ${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
+      "  COMMAND sort ${CMAKE_SOURCE_DIR}/.clang_complete | uniq > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete_tmp\n"
+      "  COMMAND sed \"/^-o/d\" ${CMAKE_SOURCE_DIR}/.clang_complete_tmp > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
+      "  COMMAND sed \"/^-c/d\" ${CMAKE_SOURCE_DIR}/.clang_complete > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete_tmp VERBATIM\n"
+      "  COMMAND sed \"/^ /d\" ${CMAKE_SOURCE_DIR}/.clang_complete_tmp > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
+      "  COMMAND sed \"/^\\{/d\" ${CMAKE_SOURCE_DIR}/.clang_complete > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete_tmp VERBATIM\n"
+      "  COMMAND sed \"/^\\}/d\" ${CMAKE_SOURCE_DIR}/.clang_complete_tmp > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
+      "  COMMAND sed \"/^\\\\[/d\" ${CMAKE_SOURCE_DIR}/.clang_complete > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete_tmp VERBATIM\n"
+      "  COMMAND sed \"/^\\\\]/d\" ${CMAKE_SOURCE_DIR}/.clang_complete_tmp > "
+      "${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
+      "  COMMAND rm ${CMAKE_SOURCE_DIR}/.clang_complete_tmp"
       "\n)";
 
   CommonWriter::UpdateIfDifferent("./CMakeLists.txt", expected);
