@@ -6,31 +6,29 @@ cmake_minimum_required(VERSION 3.6)
 set(cpp_files
   ./precomp/precomp.cc
   ./source/main.cc
-  ./source/utility/settings_parser.cc
   ./source/utility/repo_searcher.cc
+  ./source/utility/settings_parser.cc
   ./source/writers/benchmarktarget_writer.cc
-  ./source/writers/testtarget_writer.cc
   ./source/writers/cmake_writer.cc
   ./source/writers/common_writer.cc
   ./source/writers/subdir_writer.cc
+  ./source/writers/testtarget_writer.cc
   ./benchmark/benchmark_testbench.h
   ./precomp/precomp.h
-  ./source/utility/settings_parser.h
   ./source/utility/repo_searcher.h
+  ./source/utility/settings_parser.h
+  ./source/writers/benchmarktarget_writer.h
   ./source/writers/cmake_writer.h
   ./source/writers/common_writer.h
-  ./source/writers/benchmarktarget_writer.h
   ./source/writers/subdir_writer.h
   ./source/writers/testtarget_writer.h
+  ./test/test_common_writer.h
   ./test/test_subdir_writer.h
   ./test/test_testtarget_writer.h
-  ./test/test_common_writer.h
 )
 
-source_group(test FILES
-  ./test/test_subdir_writer.h
-  ./test/test_testtarget_writer.h
-  ./test/test_common_writer.h
+source_group(benchmark FILES
+  ./benchmark/benchmark_testbench.h
 )
 
 source_group(precomp FILES
@@ -42,28 +40,30 @@ source_group(source FILES
   ./source/main.cc
 )
 
+source_group(source\\utility FILES
+  ./source/utility/repo_searcher.cc
+  ./source/utility/settings_parser.cc
+  ./source/utility/repo_searcher.h
+  ./source/utility/settings_parser.h
+)
+
 source_group(source\\writers FILES
   ./source/writers/benchmarktarget_writer.cc
-  ./source/writers/testtarget_writer.cc
   ./source/writers/cmake_writer.cc
   ./source/writers/common_writer.cc
   ./source/writers/subdir_writer.cc
+  ./source/writers/testtarget_writer.cc
+  ./source/writers/benchmarktarget_writer.h
   ./source/writers/cmake_writer.h
   ./source/writers/common_writer.h
-  ./source/writers/benchmarktarget_writer.h
   ./source/writers/subdir_writer.h
   ./source/writers/testtarget_writer.h
 )
 
-source_group(source\\utility FILES
-  ./source/utility/settings_parser.cc
-  ./source/utility/repo_searcher.cc
-  ./source/utility/settings_parser.h
-  ./source/utility/repo_searcher.h
-)
-
-source_group(benchmark FILES
-  ./benchmark/benchmark_testbench.h
+source_group(test FILES
+  ./test/test_common_writer.h
+  ./test/test_subdir_writer.h
+  ./test/test_testtarget_writer.h
 )
 
 add_msvc_precompiled_header("precomp.h" "./precomp/precomp.cc" cpp_files)
@@ -80,7 +80,6 @@ include_directories(cmakemaker
 )
 
 target_link_libraries(cmakemaker
-  libstdc++fs.a
 )
 
 add_dependencies(cmakemaker ALL_PRE_BUILD)

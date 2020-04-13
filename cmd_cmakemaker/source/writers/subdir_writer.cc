@@ -108,7 +108,7 @@ void SubdirWriter::WriteSubdir(
 
   for (auto& p_name : proj_names) {
     std::set<std::string> include_dirs;
-    if (std::experimental::filesystem::exists("./source_shared"))
+    if (std::filesystem::exists("./source_shared"))
       include_dirs.insert("../source_shared");
 
     for (auto& d : dir.directories)

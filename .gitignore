@@ -1,2 +1,6 @@
-__project_files_cmake_win64__/
-/_build_release_/
+__project_files_cmake_win64__
+/_build_release_
+/build_release
+/build
+/.vscode
+*.pdb

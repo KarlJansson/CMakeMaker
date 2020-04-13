@@ -2,12 +2,14 @@
 
 #include "repo_searcher.h"
 
+#include <regex>
+
 RepoSearcher::RepoSearcher() {}
 
 RepoSearcher::directory RepoSearcher::SearchPath(std::string path) {
   directory result;
   result.dir_name = path;
-  for (auto& p : std::experimental::filesystem::directory_iterator(path))
+  for (auto& p : std::filesystem::directory_iterator(path))
     CollectEntry(p, result, path, false);
   return result;
 }
@@ -15,8 +17,7 @@ RepoSearcher::directory RepoSearcher::SearchPath(std::string path) {
 RepoSearcher::directory RepoSearcher::SearchPathSubdirs(std::string path) {
   directory result;
   result.dir_name = path;
-  for (auto& p :
-       std::experimental::filesystem::recursive_directory_iterator(path))
+  for (auto& p : std::filesystem::recursive_directory_iterator(path))
     CollectEntry(p, result, path, true);
   return result;
 }
@@ -185,19 +186,21 @@ void RepoSearcher::ProcessFile(
         "\"" + file.substr(file.find_last_of('/') + 1, file.size()) + "\"");
 }
 
-void RepoSearcher::CollectEntry(
-    const std::experimental::filesystem::v1::directory_entry& entry,
-    RepoSearcher::directory& dir, std::string& dir_name, bool subdir) {
+void RepoSearcher::CollectEntry(const std::filesystem::directory_entry& entry,
+                                RepoSearcher::directory& dir,
+                                std::string& dir_name, bool subdir) {
   std::stringstream path_stream;
   path_stream << entry;
   std::string path = path_stream.str();
 #ifdef WindowsBuild
+  // Doing this in two steps since the one step leads to "//" instead of "/"
+  // being written.
   std::replace(path.begin(), path.end(), '\\', '/');
-#elif UnixBuild
+  path = std::regex_replace(path, std::regex("//"), "/");
+#endif
   std::replace(path.begin(), path.end(), '\"', ' ');
   while (!path.empty() && path[0] == ' ') path = path.substr(1, path.size());
   while (!path.empty() && path.back() == ' ') path.pop_back();
-#endif
 
   if (dir_name.compare("./") != 0) {
     std::string::size_type i = path.find(
@@ -205,7 +208,7 @@ void RepoSearcher::CollectEntry(
     if (i != std::string::npos) path.erase(i, dir_name.length() - 1);
   }
 
-  if (std::experimental::filesystem::is_directory(entry)) {
+  if (std::filesystem::is_directory(entry)) {
     if (path.find("runnable_") != std::string::npos ||
         path.find("cmd_") != std::string::npos ||
         path.find("app_") != std::string::npos ||
@@ -215,7 +218,7 @@ void RepoSearcher::CollectEntry(
         path.find("dlib_") != std::string::npos ||
         path.find("lib_") != std::string::npos || subdir)
       dir.directories.emplace_back(path);
-  } else if (std::experimental::filesystem::is_regular_file(entry)) {
+  } else if (std::filesystem::is_regular_file(entry)) {
     std::string ext = path.substr(path.find_last_of('.') + 1, path.size());
     dir.files[ext].fmap[path.substr(0, path.find_last_of('/'))].emplace_back(
         path);

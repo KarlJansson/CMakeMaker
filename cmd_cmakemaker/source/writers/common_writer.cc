@@ -14,7 +14,7 @@ void CommonWriter::UpdateIfDifferent(std::string file_path,
                                      std::string &expected) {
   bool update = true;
   std::string check_str;
-  if (std::experimental::filesystem::exists(file_path)) {
+  if (std::filesystem::exists(file_path)) {
     std::ifstream main_check(file_path, std::ios::binary);
 
     main_check.seekg(0, std::ios::end);
@@ -87,7 +87,7 @@ void CommonWriter::WriteSourceGroups(RepoSearcher::directory &dir,
 
       group_name = "";
       for (size_t i = 0; i < dir_names.size(); ++i)
-        group_name += dir_names[i] + (i != dir_names.size() - 1 ? "\\\\" : "");
+        group_name += dir_names[i] + (i != dir_names.size() - 1 ? "/" : "");
     }
 
     expected += "source_group(" + group_name + " FILES\n";

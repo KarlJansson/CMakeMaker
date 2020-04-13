@@ -1,5 +1,5 @@
 #pragma once
-#include <experimental/filesystem>
+#include <filesystem>
 #include <map>
 #include <set>
 #include <string>
@@ -50,7 +50,7 @@ class RepoSearcher {
                    std::set<std::string>& include_files,
                    std::set<std::string>& all_headers, bool add_header);
   void CollectEntry(
-      const std::experimental::filesystem::v1::directory_entry& entry,
+      const std::filesystem::directory_entry& entry,
       RepoSearcher::directory& dir, std::string& dir_name, bool subdir);
 
   int order_ = 0;

@@ -10,10 +10,11 @@ CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
   SettingsParser parse;
   std::string cmake_config_path;
 #ifdef WindowsBuild
-  if (std::experimental::filesystem::exists("./.cmakemaker_win"))
+  if (std::filesystem::exists("./.cmakemaker_win")) {
     cmake_config_path = "./.cmakemaker_win";
+  }
 #else
-  if (std::experimental::filesystem::exists("./.cmakemaker_unix"))
+  if (std::filesystem::exists("./.cmakemaker_unix"))
     cmake_config_path = "./.cmakemaker_unix";
 #endif
   if (cmake_config_path.empty())
@@ -25,10 +26,12 @@ CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
 void CmakeWriter::WriteCmakeFiles() {
   main_dir_ = searcher_.SearchPath("./");
 
-  for (auto& dir : main_dir_.directories)
+  for (auto& dir : main_dir_.directories) {
     if (dir.find("benchmark_") == std::string::npos &&
-        dir.find("test_") == std::string::npos)
+        dir.find("test_") == std::string::npos) {
       targets_[dir] = searcher_.SearchPathSubdirs(dir);
+    }
+  }
   searcher_.FindDependencies(targets_, libraries_);
   WriteMain(main_dir_);
 
@@ -68,23 +71,8 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "project(cmakemaker_solution CXX)\n\n"
 
       "set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n"
-      "macro(add_msvc_precompiled_header PrecompiledHeader \n"
+      "macro(add_msvc_precompiled_header PrecompiledHeader "
       "PrecompiledSource SourcesVar)\n"
-      "  if(MSVC)\n"
-      "    get_filename_component(PrecompiledBasename ${PrecompiledHeader} "
-      "NAME_WE)\n"
-      "    set(PrecompiledBinary \"$(IntDir)/${PrecompiledBasename}.pch\")\n"
-      "    set(Sources ${${SourcesVar}})\n"
-      "    set_source_files_properties(${Sources}\n"
-      "      PROPERTIES COMPILE_FLAGS \"/Yu\\\"${PrecompiledHeader}\\\" "
-      "/FI\\\"${PrecompiledHeader}\\\" /Fp\\\"${PrecompiledBinary}\\\"\"\n"
-      "      OBJECT_DEPENDS \"${PrecompiledBinary}\")\n"
-      "    set_source_files_properties(${PrecompiledSource}\n"
-      "      PROPERTIES COMPILE_FLAGS \"/Yc\\\"${PrecompiledHeader}\\\" "
-      "/FI\\\"${PrecompiledHeader}\\\" /Fp\\\"${PrecompiledBinary}\\\"\"\n"
-      "      OBJECT_OUTPUTS \"${PrecompiledBinary}\")\n"
-      "    list(APPEND ${SourcesVar} ${PrecompiledSource})\n"
-      "  endif(MSVC)\n"
       "endmacro(add_msvc_precompiled_header)\n\n"
 
       "set(LIBRARY_OUTPUT_PATH Build_Output/libs CACHE PATH \"Lib path\")\n"
@@ -95,7 +83,9 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
 
       "if (WIN32)\n"
       "  add_definitions(-DWindowsBuild)\n"
-      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -MP\")\n"
+      "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -MP /std:" +
+      cpp_version +
+      "\")\n"
 
       "else(WIN32)\n"
       "  add_definitions(-DUnixBuild)\n"
@@ -202,8 +192,9 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
         "endif(MSVC)\n";
   }
 
-  // Copy the compilation database to the root source dir
-  // Make a .clang_complete compilation database from the compile_commands file
+// Copy the compilation database to the root source dir
+// Make a .clang_complete compilation database from the compile_commands file
+#ifndef WindowsBuild
   expected +=
       "add_custom_command(TARGET ALL_PRE_BUILD PRE_BUILD\n"
       "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different "
@@ -231,6 +222,7 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "${CMAKE_SOURCE_DIR}/.clang_complete VERBATIM\n"
       "  COMMAND rm ${CMAKE_SOURCE_DIR}/.clang_complete_tmp"
       "\n)";
+#endif
 
   CommonWriter::UpdateIfDifferent("./CMakeLists.txt", expected);
 }
