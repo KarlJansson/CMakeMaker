@@ -1,8 +1,8 @@
-#include "precomp.h"
-
 #include "repo_searcher.h"
 
 #include <regex>
+
+#include "precomp.h"
 
 RepoSearcher::RepoSearcher() {}
 
@@ -212,8 +212,9 @@ void RepoSearcher::CollectEntry(const std::filesystem::directory_entry& entry,
     if (path.find("runnable_") != std::string::npos ||
         path.find("cmd_") != std::string::npos ||
         path.find("app_") != std::string::npos ||
-        path.find("test_") != std::string::npos ||
+        path.find("shared_") != std::string::npos ||
         path.find("benchmark_") != std::string::npos ||
+        path.find("test_") != std::string::npos ||
         path.find("slib_") != std::string::npos ||
         path.find("dlib_") != std::string::npos ||
         path.find("lib_") != std::string::npos || subdir)

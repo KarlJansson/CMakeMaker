@@ -1,7 +1,7 @@
-#include "precomp.h"
-
 #include "benchmarktarget_writer.h"
+
 #include "common_writer.h"
+#include "precomp.h"
 
 void BenchmarktargetWriter::WriteBenchmarkTarget(
     std::string dir_name,
@@ -29,8 +29,7 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
 
   if (std::filesystem::exists("./source_shared")) {
     include_dirs.insert("../source_shared");
-    for (auto &p :
-         std::filesystem::directory_iterator("./source_shared")) {
+    for (auto &p : std::filesystem::directory_iterator("./source_shared")) {
       if (std::filesystem::is_regular_file(p)) {
         std::stringstream path_stream;
         path_stream << p;
@@ -133,6 +132,7 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
   std::set<std::string> link_libraries;
   for (auto &dir : targets) {
     if (dir.first.find("test_") != std::string::npos) continue;
+    if (dir.first.find("shared_") != std::string::npos) continue;
     if (dir.first.find("benchmark_") != std::string::npos) continue;
 
     std::string dir_n =
@@ -267,8 +267,7 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
 bool BenchmarktargetWriter::MainUpdateNeeded(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory> &targets) {
-  if (!std::filesystem::exists(dir_name + "/benchmark_main.cc"))
-    return true;
+  if (!std::filesystem::exists(dir_name + "/benchmark_main.cc")) return true;
 
   std::ifstream bench_main(dir_name + "/benchmark_main.cc");
 

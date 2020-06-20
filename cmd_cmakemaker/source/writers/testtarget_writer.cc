@@ -1,7 +1,7 @@
-#include "precomp.h"
+#include "testtarget_writer.h"
 
 #include "common_writer.h"
-#include "testtarget_writer.h"
+#include "precomp.h"
 
 void TesttargetWriter::WriteTestTarget(
     std::string dir_name,
@@ -29,8 +29,7 @@ void TesttargetWriter::WriteTestTarget(
 
   if (std::filesystem::exists("./source_shared")) {
     include_dirs.insert("../source_shared");
-    for (auto &p :
-         std::filesystem::directory_iterator("./source_shared")) {
+    for (auto &p : std::filesystem::directory_iterator("./source_shared")) {
       if (std::filesystem::is_regular_file(p)) {
         std::stringstream path_stream;
         path_stream << p;
@@ -46,7 +45,8 @@ void TesttargetWriter::WriteTestTarget(
   precomp_includes += "\n";
 
   for (auto &include : all_includes) {
-    while (include.second.back() == '\"') include.second.pop_back();
+    while (include.second[0] != '\"' && include.second.back() == '\"')
+      include.second.pop_back();
     precomp_includes += "#include " + include.second + "\n";
   }
 
@@ -139,6 +139,7 @@ void TesttargetWriter::WriteTestTarget(
   std::set<std::string> link_libraries;
   for (auto &dir : targets) {
     if (dir.first.find("benchmark_") != std::string::npos) continue;
+    if (dir.first.find("shared_") != std::string::npos) continue;
     if (dir.first.find("test_") != std::string::npos) continue;
 
     std::string dir_n =
@@ -269,8 +270,7 @@ void TesttargetWriter::WriteTestTarget(
 bool TesttargetWriter::MainUpdateNeeded(
     std::string dir_name,
     std::map<std::string, RepoSearcher::directory> &targets) {
-  if (!std::filesystem::exists(dir_name + "/test_main.cc"))
-    return true;
+  if (!std::filesystem::exists(dir_name + "/test_main.cc")) return true;
 
   std::ifstream test_main(dir_name + "/test_main.cc");
 

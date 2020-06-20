@@ -1,7 +1,7 @@
-#include "precomp.h"
+#include "cmake_writer.h"
 
 #include "benchmarktarget_writer.h"
-#include "cmake_writer.h"
+#include "precomp.h"
 #include "settings_parser.h"
 #include "subdir_writer.h"
 #include "testtarget_writer.h"
@@ -26,12 +26,12 @@ CmakeWriter::CmakeWriter(RepoSearcher searcher) : searcher_(searcher) {
 void CmakeWriter::WriteCmakeFiles() {
   main_dir_ = searcher_.SearchPath("./");
 
-  for (auto& dir : main_dir_.directories) {
+  for (auto& dir : main_dir_.directories)
     if (dir.find("benchmark_") == std::string::npos &&
-        dir.find("test_") == std::string::npos) {
+        dir.find("test_") == std::string::npos &&
+        dir.find("shared_") == std::string::npos)
       targets_[dir] = searcher_.SearchPathSubdirs(dir);
-    }
-  }
+
   searcher_.FindDependencies(targets_, libraries_);
   WriteMain(main_dir_);
 
@@ -39,8 +39,14 @@ void CmakeWriter::WriteCmakeFiles() {
   auto subdir_writer = std::make_unique<SubdirWriter>();
   for (auto& dir : main_dir_.directories)
     if (dir.find("benchmark_") == std::string::npos &&
-        dir.find("test_") == std::string::npos)
+        dir.find("test_") == std::string::npos &&
+        dir.find("shared_") == std::string::npos)
       subdir_writer->WriteSubdir(dir, targets_[dir], targets_, libraries_);
+
+  // Add the shared code to targets
+  for (auto& dir : main_dir_.directories)
+    if (targets_.find(dir) == std::end(targets_))
+      targets_[dir] = searcher_.SearchPathSubdirs(dir);
 
   // Write benchmark targets
   auto benchmarktarget_writer = std::make_unique<BenchmarktargetWriter>();
