@@ -198,7 +198,7 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
   link_libraries.insert("optimized D:/API/GoogleBenchmark/lib/benchmark.lib");
   link_libraries.insert("debug D:/API/GoogleBenchmark/lib/benchmarkd.lib");
 #else
-  link_libraries.insert("libbenchmark.a");
+  link_libraries.insert("libbenchmark.so");
   link_libraries.insert("libpthread.so");
 #endif
 

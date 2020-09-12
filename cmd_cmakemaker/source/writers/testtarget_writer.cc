@@ -53,16 +53,18 @@ void TesttargetWriter::WriteTestTarget(
   precomp_includes += "\n";
 
   std::string expected_precomp_h =
-      "#include <gtest/gt"
-      "est.h>\n\n" +
-      precomp_includes;
+      "#include <gtest/gtest.h>\n\n" + precomp_includes;
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.h", expected_precomp_h);
 
   std::string expected_precomp_cc = "#include \"precomp.h\"\n\n";
   CommonWriter::UpdateIfDifferent(dir_name + "/precomp.cc",
                                   expected_precomp_cc);
 
-  std::string expected_test_main = "#include \"precomp.h\"\n\n";
+  std::string expected_test_main =
+      "#ifndef TEST_TARGET\n"
+      "#define TEST_TARGET\n"
+      "#endif\n\n"
+      "#include \"precomp.h\"\n\n";
   for (auto &dir : targets)
     for (auto &obj_dir : dir.second.files["h"].fmap)
       for (auto &obj : obj_dir.second)
