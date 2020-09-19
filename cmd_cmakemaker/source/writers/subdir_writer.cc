@@ -1,7 +1,7 @@
-#include "precomp.h"
+#include "subdir_writer.h"
 
 #include "common_writer.h"
-#include "subdir_writer.h"
+#include "precomp.h"
 
 void SubdirWriter::WriteSubdir(
     std::string dir_name, RepoSearcher::directory& dir,
@@ -106,6 +106,13 @@ void SubdirWriter::WriteSubdir(
   }
   expected += "\n";
 
+#ifdef WindowsBuild
+  std::string shared_ext = ".dll";
+  std::string shared_prefix = "";
+#else
+  std::string shared_ext = ".so";
+  std::string shared_prefix = "lib";
+#endif
   for (auto& p_name : proj_names) {
     std::set<std::string> include_dirs;
     if (std::filesystem::exists("./source_shared"))
@@ -138,15 +145,27 @@ void SubdirWriter::WriteSubdir(
         expected +=
             "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n"
             "    \"";
-        for (auto& conf : CommonWriter::configs_)
-          expected += "$<$<CONFIG:" + conf +
-                      ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/libs/" +
-                      conf + "/" + p_name + ".dll>";
+        for (auto& conf : CommonWriter::configs_) {
+          if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+          expected += "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/libs/";
+          if (!conf.empty()) expected += conf + "/";
+          expected += shared_prefix + p_name + shared_ext;
+          if (!conf.empty()) expected += ">";
+        }
         expected += "\"\n    \"";
-        for (auto& conf : CommonWriter::configs_)
-          expected += "$<$<CONFIG:" + conf +
-                      ">:${CMAKE_CURRENT_BINARY_DIR}/../" + dep +
-                      "/Build_Output/bin/" + conf + "/" + p_name + ".dll>";
+        for (auto& conf : CommonWriter::configs_) {
+          if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+          expected +=
+              "${CMAKE_CURRENT_BINARY_DIR}/../" + dep + "/Build_Output/";
+          if (dep.find("slib_") != std::string::npos ||
+              dep.find("dlib_") != std::string::npos)
+            expected += "libs/";
+          else
+            expected += "bin/";
+          if (!conf.empty()) expected += conf + "/";
+          expected += shared_prefix + p_name + shared_ext;
+          if (!conf.empty()) expected += ">";
+        }
         expected += "\"\n";
       }
       expected += ")\n\n";
@@ -176,23 +195,30 @@ void SubdirWriter::WriteSubdir(
               "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n"
               "    \"";
 
-          for (auto& conf : CommonWriter::configs_)
-            expected += "$<$<CONFIG:" + conf + ">:" +
+          for (auto& conf : CommonWriter::configs_) {
+            if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+            expected += shared_prefix +
                         (conf.compare("Debug") == 0
                              ? debug_dll + libraries[lib].debug_suffix
                              : dll) +
-                        ".dll>";
+                        shared_ext;
+            if (!conf.empty()) expected += ">";
+          }
           expected += "\"\n    \"";
-          for (auto& conf : CommonWriter::configs_)
+          for (auto& conf : CommonWriter::configs_) {
+            if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+            expected += "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/";
+            if (!conf.empty()) expected += conf + "/";
             expected +=
-                "$<$<CONFIG:" + conf +
-                ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/" + conf + "/" +
+                shared_prefix +
                 (conf.compare("Debug") == 0
                      ? debug_dll.substr(debug_dll.find_last_of('/') + 1,
                                         debug_dll.size()) +
                            libraries[lib].debug_suffix
                      : dll.substr(dll.find_last_of('/') + 1, dll.size())) +
-                ".dll>";
+                shared_ext;
+            if (!conf.empty()) expected += ">";
+          }
           expected += "\"\n";
         }
       }

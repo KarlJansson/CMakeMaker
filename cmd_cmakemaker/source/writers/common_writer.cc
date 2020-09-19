@@ -1,9 +1,13 @@
-#include "precomp.h"
-
 #include "common_writer.h"
 
+#include "precomp.h"
+
+#ifdef WindowsBuild
 const std::vector<std::string> CommonWriter::configs_ = {
     "Release", "Debug", "MinSizeRel", "RelWithDebInfo"};
+#else
+const std::vector<std::string> CommonWriter::configs_ = {""};
+#endif
 const std::vector<std::string> CommonWriter::extensions_ = {"cc", "cpp", "h",
                                                             "cu", "cuh", "qml"};
 const std::string CommonWriter::cmake_header_ =

@@ -206,6 +206,13 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
   for (auto &lib : link_libraries) expected += "  " + lib + "\n";
   expected += ")\n\n";
 
+#ifdef WindowsBuild
+  std::string shared_ext = ".dll";
+  std::string shared_prefix = "";
+#else
+  std::string shared_ext = ".so";
+  std::string shared_prefix = "lib";
+#endif
   for (auto &dir : targets) {
     if (dir.first.find("test_") != std::string::npos) continue;
     std::set<std::string> libs;
@@ -227,24 +234,30 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
         expected +=
             "  COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different\n    \"";
 
-        for (auto &conf : CommonWriter::configs_)
-          expected += "$<$<CONFIG:" + conf + ">:" +
+        for (auto &conf : CommonWriter::configs_) {
+          if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+          expected += shared_prefix +
                       (conf.compare("Debug") == 0
                            ? debug_dll + libraries[lib].debug_suffix
                            : dll) +
-                      ".dll>";
+                      shared_ext;
+          if (!conf.empty()) expected += ">";
+        }
         expected += "\"\n    \"";
-        for (auto &conf : CommonWriter::configs_)
+        for (auto &conf : CommonWriter::configs_) {
+          if (!conf.empty()) expected += "$<$<CONFIG:" + conf + ">:";
+          expected += "${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/";
+          if (!conf.empty()) expected += conf + "/";
           expected +=
-              "$<$<CONFIG:" + conf +
-              ">:${CMAKE_CURRENT_BINARY_DIR}/Build_Output/bin/" + conf + "/" +
-
+              shared_prefix +
               (conf.compare("Debug") == 0
                    ? debug_dll.substr(debug_dll.find_last_of('/') + 1,
                                       debug_dll.size()) +
                          libraries[lib].debug_suffix
                    : dll.substr(dll.find_last_of('/') + 1, dll.size())) +
-              ".dll>";
+              shared_ext;
+          if (!conf.empty()) expected += ">";
+        }
         expected += "\"\n";
       }
     }
