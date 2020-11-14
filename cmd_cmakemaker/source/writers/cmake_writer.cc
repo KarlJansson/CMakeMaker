@@ -98,7 +98,6 @@ void CmakeWriter::WriteMain(RepoSearcher::directory& dir) {
       "  set(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -std=" +
       cpp_version +
       "\")\n"
-      "  set(CMAKE_CXX_FLAGS_DEBUG  \"${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\")\n"
       "endif(WIN32)\n\n"
 
       "find_program(CMAKEMAKER_CMD cmakemaker)\n"
