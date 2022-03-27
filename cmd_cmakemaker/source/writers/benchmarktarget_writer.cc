@@ -47,7 +47,10 @@ void BenchmarktargetWriter::WriteBenchmarkTarget(
 
   for (auto &include : all_includes) {
     while (include.second.back() == '\"') include.second.pop_back();
-    precomp_includes += "#include " + include.second + "\n";
+    precomp_includes += "#include " + include.second;
+    if (!include.second.empty() && include.second.back() != '>')
+      precomp_includes += "\"";
+    precomp_includes += "\n";
   }
 
   precomp_includes += "\n";
